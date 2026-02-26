@@ -18,6 +18,59 @@ from auth import verify_password, get_password_hash, create_access_token, SECRET
 from jose import jwt, JWTError
 from utils.mental_health_tracker import MentalHealthTracker
 
+import torch
+import torch.nn.functional as F
+from torchvision import transforms
+from transformers import DistilBertTokenizer
+import librosa
+import numpy as np
+import io
+from PIL import Image
+
+# Import trained architectures
+from models.visual_model import FaceEmotionCNN
+from models.text_model import build_text_model
+from models.audio_video_model import AudioEmotionLSTM
+
+# --- Global Model Loading ---
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+print(f"API Server binding inference to: {device.type.upper()}")
+
+# Load Vision Model
+vis_model = FaceEmotionCNN(num_classes=7).to(device)
+try:
+    vis_model.load_state_dict(torch.load("d:/MULTIMODAL_EMOTION_DETECTION_01/outputs/models/vis_model.pth", map_location=device))
+    print("Loaded custom trained Vision Model weights.")
+except:
+    print("Warning: Vision weights not found. Using untrained weights.")
+vis_model.eval()
+
+# Load Text Model
+text_model, _ = build_text_model(num_labels=7)
+try:
+    text_model.load_state_dict(torch.load("d:/MULTIMODAL_EMOTION_DETECTION_01/outputs/models/text_model.pth", map_location=device))
+    print("Loaded custom trained Text Model weights.")
+except:
+    print("Warning: Text weights not found.")
+text_model = text_model.to(device)
+text_model.eval()
+tokenizer = DistilBertTokenizer.from_pretrained('distilbert-base-uncased')
+
+# Load Audio Model
+aud_model = AudioEmotionLSTM(input_size=40, num_classes=7).to(device)
+try:
+    aud_model.load_state_dict(torch.load("d:/MULTIMODAL_EMOTION_DETECTION_01/outputs/models/aud_model.pth", map_location=device))
+    print("Loaded custom trained Audio LSTM weights.")
+except:
+    print("Warning: Audio weights not found.")
+aud_model.eval()
+
+vis_transform = transforms.Compose([
+    transforms.Resize((224, 224)),
+    transforms.ToTensor(),
+    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+])
+
 # Initialize Rate Limiter
 limiter = Limiter(key_func=get_remote_address)
 
@@ -71,13 +124,49 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
 # --- Core Logic ---
 EMOTIONS = ['Angry', 'Disgust', 'Fear', 'Happy', 'Sad', 'Surprise', 'Neutral']
 
-def mock_inference():
-    time.sleep(random.uniform(0.1, 0.4))
-    scores = {emo: round(random.uniform(0.01, 0.99), 3) for emo in EMOTIONS}
-    total = sum(scores.values())
-    scores = {k: round(v / total, 3) for k, v in scores.items()}
+def _process_logits(logits):
+    """Converts raw model logits into a softmax confidence dictionary and returns dominant emotion."""
+    probs = F.softmax(logits, dim=1).squeeze().tolist()
+    scores = {EMOTIONS[i]: round(float(probs[i]), 3) for i in range(7)}
     pred_emo = max(scores, key=scores.get)
     return pred_emo, scores
+
+def analyze_vision(file_bytes: bytes):
+    image = Image.open(io.BytesIO(file_bytes)).convert("RGB")
+    tensor = vis_transform(image).unsqueeze(0).to(device)
+    with torch.no_grad():
+        logits = vis_model(tensor)
+    return _process_logits(logits)
+
+def analyze_text(text: str):
+    encoding = tokenizer(
+        text, add_special_tokens=True, max_length=64, return_token_type_ids=False,
+        padding='max_length', return_attention_mask=True, return_tensors='pt', truncation=True
+    )
+    input_ids = encoding['input_ids'].to(device)
+    attention_mask = encoding['attention_mask'].to(device)
+    with torch.no_grad():
+        outputs = text_model(input_ids=input_ids, attention_mask=attention_mask)
+        logits = outputs.logits
+    return _process_logits(logits)
+
+def analyze_audio(file_bytes: bytes):
+    # Librosa requires a file-like object or path.
+    with open("temp_audio.wav", "wb") as f:
+        f.write(file_bytes)
+    y, sr = librosa.load("temp_audio.wav", sr=16000)
+    mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=40).T
+    max_len = 32
+    if mfcc.shape[0] < max_len:
+        pad_width = max_len - mfcc.shape[0]
+        mfcc = np.pad(mfcc, pad_width=((0, pad_width), (0, 0)), mode='constant')
+    else:
+        mfcc = mfcc[:max_len, :]
+    
+    tensor = torch.tensor(mfcc, dtype=torch.float32).unsqueeze(0).to(device)
+    with torch.no_grad():
+        logits = aud_model(tensor)
+    return _process_logits(logits)
 
 # --- Routes ---
 @app.post("/token", response_model=Token)
@@ -114,7 +203,7 @@ async def predict_vision(request: Request, file: UploadFile = File(...), current
     if random.random() < 0.1: # 10% chance to simulate "No face detected"
         raise HTTPException(status_code=422, detail="NO FACE DETECTED: Please adjust your camera angle to align your face.")
 
-    pred, scores = mock_inference()
+    pred, scores = analyze_vision(file_bytes)
     latency = (time.time() - start_time) * 1000
 
     # 2. Add temporal analytics tracking
@@ -148,7 +237,7 @@ async def predict_text(request: Request, text: str = Form(...), current_user: DB
         raise HTTPException(status_code=400, detail="Text cannot be empty.")
     
     start_time = time.time()
-    pred, scores = mock_inference()
+    pred, scores = analyze_text(text)
     latency = (time.time() - start_time) * 1000
 
     return InferenceResponse(modality="text", predicted_emotion=pred, confidence_scores=scores, latency_ms=round(latency, 2))
@@ -161,8 +250,8 @@ async def predict_audio(request: Request, file: UploadFile = File(...), current_
         warning_msg = "NOISY AUDIO DETECTED: Applying background noise reduction filter before inference."
         
     start_time = time.time()
-    _ = await file.read()
-    pred, scores = mock_inference()
+    file_bytes = await file.read()
+    pred, scores = analyze_audio(file_bytes)
     latency = (time.time() - start_time) * 1000
 
     # Slight latency penalty to simulate noise reduction
@@ -191,7 +280,7 @@ async def websocket_vision_endpoint(websocket: WebSocket, db: Session = Depends(
             start_time = time.time()
             
             # Predict
-            pred, scores = mock_inference()
+            pred, scores = analyze_vision(frame_bytes)
             latency = (time.time() - start_time) * 1000
 
             # Track
