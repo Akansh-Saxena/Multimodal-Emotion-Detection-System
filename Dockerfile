@@ -45,6 +45,7 @@ EXPOSE 8000
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1
+ENV PYTHONPATH="${PYTHONPATH}:/app/src"
 
 # Command to run the application using Gunicorn with Uvicorn workers for ASGI support
 CMD ["gunicorn", "src.api:app", "--workers", "2", "--worker-class", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:8000", "--timeout", "120"]
