@@ -640,7 +640,7 @@
             }
 
             // Update Charts
-            const scoresArray = labels.map(l => data.confidence_scores[l] || 0);
+            const scoresArray = EMOTIONS.map(l => data.confidence_scores[l] || 0);
 
             radarChart.data.datasets[0].data = scoresArray;
             radarChart.update();
@@ -653,7 +653,9 @@
             toggleLoader(true);
             document.getElementById('warningBanner').classList.add('hidden');
             try {
-                const headers = {};
+                const headers = {
+                    'ngrok-skip-browser-warning': 'true'
+                };
                 if (JWT_TOKEN) headers['Authorization'] = `Bearer ${JWT_TOKEN}`;
 
                 const response = await fetch(`${API_BASE}${endpoint}`, {
@@ -822,6 +824,9 @@
             try {
                 const response = await fetch(`${API_BASE}/predict/vision`, {
                     method: 'POST',
+                    headers: {
+                        'ngrok-skip-browser-warning': 'true'
+                    },
                     body: fd
                 });
                 if (response.ok) {
