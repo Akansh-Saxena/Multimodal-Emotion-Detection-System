@@ -1,0 +1,10 @@
+venv/
+__pycache__/
+*.pyc
+.env
+neuro_sense.db
+# Large Data folders
+FACE_RECOGNITION_DATASET_01/
+TEXT_DATASET_01/
+VIDEO-AUDIO_DATASET_01/
+outputs/

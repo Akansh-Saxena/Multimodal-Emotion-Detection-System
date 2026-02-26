@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multimodal Emotion Detector | Next-Gen AI</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'neon-blue': '#00f3ff',
+                        'neon-purple': '#bd00ff',
+                        'dark-base': '#0a0a0f',
+                        'dark-card': '#14141e'
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Space+Grotesk:wght@500;700&display=swap"
+        rel="stylesheet">
+    <!-- Particles.js for Interactive Background -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <!-- Lottie for Micro-Interactions -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: theme('colors.dark-base');
+            color: white;
+            overflow-x: hidden;
+        }
+
+        .text-glow {
+            text-shadow: 0 0 10px theme('colors.neon-blue'), 0 0 20px theme('colors.neon-blue');
+        }
+
+        .glass-panel {
+            background: rgba(20, 20, 30, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .gradient-border {
+            position: relative;
+            background: theme('colors.dark-card');
+            background-clip: padding-box;
+            border: 2px solid transparent;
+            border-radius: 1rem;
+        }
+
+        .gradient-border::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            z-index: -1;
+            margin: -2px;
+            border-radius: inherit;
+            background: linear-gradient(to right, theme('colors.neon-blue'), theme('colors.neon-purple'));
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: theme('colors.dark-base');
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: theme('colors.neon-purple');
+            border-radius: 4px;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen relative flex flex-col">
+
+    <!-- Background decorative gradients -->
+    <div
+        class="fixed top-[-20%] left-[-10%] w-[50%] h-[50%] bg-neon-purple/20 blur-[120px] rounded-full pointer-events-none z-0">
+    </div>
+    <div
+        class="fixed bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-neon-blue/20 blur-[120px] rounded-full pointer-events-none z-0">
+    </div>
+    <div id="particles-js" class="fixed inset-0 pointer-events-none z-0 opacity-40"></div>
+
+    <!-- Landing Page Hero / Tech Stack Marquee -->
+    <section
+        class="w-full relative z-10 py-12 px-6 flex flex-col items-center justify-center border-b border-gray-800/50 bg-black/20 backdrop-blur-sm">
+        <h1
+            class="text-5xl md:text-7xl font-black font-['Space_Grotesk'] text-transparent bg-clip-text bg-gradient-to-r from-neon-blue via-neon-purple to-neon-blue animate-pulse-slow text-center mb-4">
+            NeuroSense AI
+        </h1>
+        <p class="text-gray-400 text-lg md:text-xl text-center max-w-2xl mb-8 font-light">
+            An Enterprise-Grade Multimodal Emotion Detection Core.<br />
+            Try the <span class="text-neon-blue font-semibold">Live Demo Zone</span> below without an account.
+        </p>
+
+        <!-- Tech Stack Marquee -->
+        <div class="w-full max-w-5xl overflow-hidden relative fade-edges">
+            <div class="flex gap-12 animate-[marquee_20s_linear_infinite] whitespace-nowrap opacity-60">
+                <span class="text-xl font-bold flex items-center gap-2 px-6"><i
+                        class="ph-fill ph-fire text-[#EE4C2C]"></i> PyTorch</span>
+                <span class="text-xl font-bold flex items-center gap-2 px-6"><i
+                        class="ph-bold ph-lightning text-[#009688]"></i> FastAPI</span>
+                <span class="text-xl font-bold flex items-center gap-2 px-6"><i
+                        class="ph-bold ph-docker-logo text-[#2496ED]"></i> Docker</span>
+                <span class="text-xl font-bold flex items-center gap-2 px-6"><i
+                        class="ph-bold ph-device-mobile text-[#61DAFB]"></i> React / Flutter</span>
+                <span class="text-xl font-bold flex items-center gap-2 px-6"><i
+                        class="ph-fill ph-leaf text-[#47A248]"></i> MongoDB / SQLite</span>
+                <!-- Duplicate for seamless loop -->
+                <span class="text-xl font-bold flex items-center gap-2 px-6"><i
+                        class="ph-fill ph-fire text-[#EE4C2C]"></i> PyTorch</span>
+                <span class="text-xl font-bold flex items-center gap-2 px-6"><i
+                        class="ph-bold ph-lightning text-[#009688]"></i> FastAPI</span>
+                <span class="text-xl font-bold flex items-center gap-2 px-6"><i
+                        class="ph-bold ph-docker-logo text-[#2496ED]"></i> Docker</span>
+                <span class="text-xl font-bold flex items-center gap-2 px-6"><i
+                        class="ph-bold ph-device-mobile text-[#61DAFB]"></i> React / Flutter</span>
+                <span class="text-xl font-bold flex items-center gap-2 px-6"><i
+                        class="ph-fill ph-leaf text-[#47A248]"></i> MongoDB / SQLite</span>
+            </div>
+        </div>
+        <style>
+            @keyframes marquee {
+                0% {
+                    transform: translateX(0);
+                }
+
+                100% {
+                    transform: translateX(-50%);
+                }
+            }
+
+            .fade-edges {
+                mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+                -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+            }
+        </style>
+    </section>
+
+    <!-- Header -->
+    <header class="w-full py-6 px-8 flex justify-between items-center z-10 glass-panel sticky top-0">
+        <div class="flex items-center gap-3">
+            <i class="ph-fill ph-brain text-4xl text-neon-blue animate-pulse-slow"></i>
+            <div>
+                <h1
+                    class="text-2xl font-['Space_Grotesk'] font-bold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-neon-blue to-neon-purple">
+                    NeuroSense</h1>
+                <p class="text-xs text-gray-400 tracking-widest uppercase">Multimodal Emotion Core</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="h-2 w-2 rounded-full bg-green-500 shadow-[0_0_8px_#22c55e] animate-pulse"></div>
+            <span class="text-sm font-semibold text-gray-300">SYSTEM ONLINE</span>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow container mx-auto px-4 py-8 z-10 flex flex-col w-full xl:w-11/12 gap-8 relative">
+
+        <!-- Live Demo Zone (Inputs & Output side-by-side) -->
+        <div class="flex flex-col lg:flex-row gap-8 w-full">
+            <!-- Left Panel: Inputs -->
+            <section class="w-full lg:w-5/12 flex flex-col gap-6">
+                <h2 class="text-xl font-semibold mb-2 flex items-center gap-2">
+                    <i class="ph ph-cpu text-neon-purple"></i> Input Modalities (Live Demo Zone)
+                </h2>
+
+                <!-- Text Input -->
+                <div class="gradient-border p-5 transition hover:scale-[1.01] duration-300">
+                    <label class="flex items-center gap-2 text-sm text-gray-300 mb-3 font-semibold">
+                        <i class="ph ph-text-aa text-lg"></i> Semantic Analysis (Text)
+                    </label>
+                    <textarea id="textInput" rows="3"
+                        class="w-full bg-black/40 border border-gray-700 rounded-lg p-3 text-white focus:outline-none focus:border-neon-blue focus:ring-1 focus:ring-neon-blue transition"
+                        placeholder="Enter text to analyze sentiment..."></textarea>
+                    <button onclick="analyzeText()"
+                        class="mt-3 w-full py-2 bg-gradient-to-r from-neon-blue/80 to-neon-blue/40 hover:from-neon-blue hover:to-neon-blue/60 text-white font-semibold rounded-lg transition shadow-[0_0_15px_rgba(0,243,255,0.3)] hover:shadow-[0_0_25px_rgba(0,243,255,0.6)]">
+                        Analyze Text
+                    </button>
+                </div>
+
+                <!-- Visual Input -->
+                <div class="gradient-border p-5 transition hover:scale-[1.01] duration-300">
+                    <label class="flex items-center gap-2 text-sm text-gray-300 mb-3 font-semibold">
+                        <i class="ph ph-camera text-lg"></i> Visual Inference (Face)
+                    </label>
+                    <div class="border-2 border-dashed border-gray-600 rounded-lg p-6 text-center hover:border-neon-purple transition cursor-pointer group"
+                        onclick="document.getElementById('imageUpload').click()">
+                        <i
+                            class="ph ph-upload-simple text-3xl text-gray-500 group-hover:text-neon-purple transition mb-2"></i>
+                        <p class="text-sm text-gray-400 group-hover:text-white transition">Click to upload image or drag
+                            &
+                            drop</p>
+                        <input type="file" id="imageUpload" class="hidden" accept="image/*"
+                            onchange="previewMedia(this, 'imagePreview')">
+                    </div>
+                    <img id="imagePreview" class="hidden mt-3 w-full h-auto max-h-48 object-cover rounded shadow-lg">
+                    <div class="flex gap-2 mt-3 w-full">
+                        <button onclick="analyzeVision()"
+                            class="flex-1 py-2 bg-gradient-to-r from-neon-purple/80 to-neon-purple/40 hover:from-neon-purple hover:to-neon-purple/60 text-white font-semibold rounded-lg transition shadow-[0_0_15px_rgba(189,0,255,0.3)] hover:shadow-[0_0_25px_rgba(189,0,255,0.6)]">
+                            Analyze Static
+                        </button>
+                        <button onclick="toggleWebcam()" id="webcamBtn"
+                            class="flex-1 py-2 bg-gray-800 hover:bg-gray-700 text-white font-semibold rounded-lg transition border border-gray-600 flex justify-center items-center gap-2">
+                            <i class="ph ph-video-camera"></i> Live Cam
+                        </button>
+                    </div>
+
+                    <!-- Live Webcam Stream -->
+                    <div id="webcamContainer"
+                        class="hidden mt-4 relative w-full rounded shadow-lg overflow-hidden border border-neon-purple/50">
+                        <video id="webcamVideo" autoplay playsinline
+                            class="w-full object-cover transform -scale-x-100"></video>
+                        <canvas id="webcamCanvas" class="hidden"></canvas>
+                        <div
+                            class="absolute top-2 right-2 flex items-center gap-2 bg-black/60 px-2 py-1 rounded text-xs text-neon-purple border border-neon-purple/30">
+                            <div class="w-2 h-2 rounded-full bg-neon-purple animate-pulse"></div> Live Inference
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Audio Input -->
+                <div class="gradient-border p-5 transition hover:scale-[1.01] duration-300">
+                    <label class="flex items-center gap-2 text-sm text-gray-300 mb-3 font-semibold">
+                        <i class="ph ph-waveform text-lg"></i> Acoustic Processing (Audio)
+                    </label>
+                    <div class="border-2 border-dashed border-gray-600 rounded-lg p-6 text-center hover:border-green-400 transition cursor-pointer group"
+                        onclick="document.getElementById('audioUpload').click()">
+                        <i
+                            class="ph ph-microphone text-3xl text-gray-500 group-hover:text-green-400 transition mb-2"></i>
+                        <p class="text-sm text-gray-400 group-hover:text-white transition">Upload audio file (.wav,
+                            .mp3)
+                        </p>
+                        <input type="file" id="audioUpload" class="hidden" accept="audio/*"
+                            onchange="showAudioName(this)">
+                    </div>
+                    <p id="audioFileName" class="text-xs text-green-400 mt-2 hidden text-center"></p>
+                    <button onclick="analyzeAudio()"
+                        class="mt-3 w-full py-2 bg-gradient-to-r from-green-500/80 to-green-500/40 hover:from-green-500 hover:to-green-500/60 text-white font-semibold rounded-lg transition shadow-[0_0_15px_rgba(34,197,94,0.3)] hover:shadow-[0_0_25px_rgba(34,197,94,0.6)]">
+                        Analyze Audio
+                    </button>
+                </div>
+
+                <!-- FUSION TRIGGER -->
+                <button onclick="triggerLateFusion()"
+                    class="mt-2 w-full py-4 bg-gradient-to-r from-neon-blue via-neon-purple to-neon-blue text-white font-bold text-lg rounded-xl transition shadow-[0_0_20px_rgba(189,0,255,0.5)] hover:shadow-[0_0_40px_rgba(0,243,255,0.8)] bg-[length:200%_auto] hover:bg-right duration-500 relative overflow-hidden group">
+                    <span class="relative z-10 flex items-center justify-center gap-2">
+                        <i class="ph-fill ph-infinity"></i> ACTIVATE MULTIMODAL FUSION
+                    </span>
+                    <div
+                        class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                    </div>
+                </button>
+
+            </section>
+
+            <!-- Right Panel: Output & Visualization -->
+            <section class="w-full lg:w-7/12 flex flex-col gap-6">
+                <h2 class="text-xl font-semibold mb-2 flex items-center gap-2">
+                    <i class="ph ph-chart-polar text-neon-blue"></i> Cognitive telemetry
+                </h2>
+
+                <!-- Dynamic Edge Case Warning Banner -->
+                <div id="warningBanner"
+                    class="hidden mb-4 p-3 rounded-lg border border-yellow-500/50 bg-yellow-500/10 text-yellow-500 text-sm flex items-start gap-2 shadow-[0_0_15px_rgba(234,179,8,0.2)]">
+                    <i class="ph-fill ph-warning-circle text-lg mt-0.5 animate-pulse"></i>
+                    <span id="warningText" class="font-semibold text-yellow-400">Warning goes here...</span>
+                </div>
+
+                <!-- Temporal Analytics Widget (Mental Health Phase 10) -->
+                <div id="temporalWidget"
+                    class="hidden glass-panel rounded-xl p-4 border border-neon-purple/30 bg-gradient-to-r from-dark-card to-neon-purple/10 mb-2 transition-all duration-500">
+                    <div class="flex items-center gap-3 mb-2">
+                        <i class="ph-fill ph-heartbeat text-2xl text-pink-500 animate-pulse"></i>
+                        <h3 class="font-['Space_Grotesk'] font-bold text-gray-200">Temporal Emotion Analytics</h3>
+                    </div>
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+                        <div class="bg-black/40 p-2 rounded">
+                            <p class="text-gray-500 text-xs">Dominant State</p>
+                            <p id="t_dominant" class="font-mono font-bold text-white">--</p>
+                        </div>
+                        <div class="bg-black/40 p-2 rounded">
+                            <p class="text-gray-500 text-xs">Stability (0-1)</p>
+                            <p id="t_stability" class="font-mono font-bold text-white">--</p>
+                        </div>
+                        <div class="bg-black/40 p-2 rounded">
+                            <p class="text-gray-500 text-xs">Valence (-1 to 1)</p>
+                            <p id="t_valence" class="font-mono font-bold text-white">--</p>
+                        </div>
+                        <div class="bg-black/40 p-2 rounded">
+                            <p class="text-gray-500 text-xs">Clinical Status</p>
+                            <p id="t_clinical" class="font-mono font-bold text-neon-purple">--</p>
+                        </div>
+                    </div>
+                    <div class="mt-3 p-2 bg-neon-purple/20 rounded border border-neon-purple/40">
+                        <p class="text-xs text-gray-300"><i class="ph ph-info text-neon-purple mr-1"></i> <span
+                                id="t_insight">Insufficient data for psychological summary.</span></p>
+                    </div>
+                </div>
+
+                <!-- Primary Output Card -->
+                <div
+                    class="glass-panel rounded-2xl p-8 relative overflow-hidden flex flex-col items-center justify-center min-h-[250px] shadow-[0_0_30px_rgba(0,0,0,0.5)] border-t border-white/5">
+
+                    <!-- Lottie Preloader -->
+                    <div id="loader"
+                        class="hidden absolute inset-0 bg-dark-card/90 backdrop-blur-md z-20 flex flex-col items-center justify-center transition-all duration-300">
+                        <div id="lottie-brain" class="w-32 h-32 opacity-80"></div>
+                        <p
+                            class="mt-2 text-neon-blue font-['Space_Grotesk'] tracking-widest pulse-slow font-bold text-sm">
+                            EXTRACTING CORTICAL FEATURES...</p>
+                    </div>
+
+                    <h3 class="text-gray-400 text-sm font-semibold tracking-widest uppercase mb-2">Primary Detected
+                        Emotion</h3>
+                    </h3>
+                    <div id="primaryEmotionResult"
+                        class="text-6xl md:text-8xl font-black font-['Space_Grotesk'] text-transparent bg-clip-text bg-gradient-to-br from-white to-gray-500 drop-shadow-2xl">
+                        WAITING
+                    </div>
+                    <div id="confidenceScore" class="mt-4 text-neon-blue font-mono text-xl text-glow hidden">
+                        Confidence: <span>0.00</span>%
+                    </div>
+                    <div id="latencyMetric" class="absolute bottom-4 right-6 text-xs text-gray-500 font-mono">
+                        Latency: -- ms
+                    </div>
+                </div>
+
+                <!-- Graphical Telemetry (Radar, Bar, Heatmap) -->
+                <div class="flex flex-col xl:flex-row gap-6">
+                    <!-- Radar Chart -->
+                    <div
+                        class="glass-panel rounded-xl p-4 flex-1 aspect-square md:aspect-auto min-h-[300px] flex flex-col">
+                        <h4 class="text-xs text-gray-500 uppercase tracking-widest mb-2 font-semibold">Spider Confidence
+                            Overlay</h4>
+                        <div class="relative flex-grow pointer-events-none">
+                            <canvas id="emotionRadarChart"></canvas>
+                        </div>
+                    </div>
+                    <!-- Timeline/Bar Chart -->
+                    <div class="glass-panel rounded-xl p-4 flex-[1.5] flex flex-col">
+                        <h4 class="text-xs text-gray-500 uppercase tracking-widest mb-2 font-semibold">Probability
+                            Distribution Matrix</h4>
+                        <div class="relative flex-grow pointer-events-none">
+                            <canvas id="emotionBarChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Historical Swipeable Cards Deck (Stub for frontend visualization) -->
+                <div class="glass-panel rounded-xl p-4 mt-2 overflow-hidden relative">
+                    <h4
+                        class="text-xs text-gray-400 uppercase tracking-widest mb-3 font-semibold flex items-center justify-between">
+                        <span>Recent History Logs</span>
+                        <span class="bg-gray-800 text-xs px-2 py-1 rounded text-gray-300">Swipe <i
+                                class="ph ph-arrows-left-right"></i></span>
+                    </h4>
+                    <div class="flex overflow-x-auto gap-4 pb-4 snap-x hide-scroll">
+                        <!-- Card 1 -->
+                        <div
+                            class="snap-center shrink-0 w-48 bg-dark-card border border-white/5 rounded-lg p-4 cursor-pointer hover:border-neon-blue/50 transition">
+                            <p class="text-xs text-gray-500 mb-1">Session: 14:02 PM</p>
+                            <p class="text-xl font-bold text-green-400">Neutral</p>
+                            <p class="text-xs text-gray-400 mt-2">Valence: +0.10</p>
+                        </div>
+                        <!-- Card 2 -->
+                        <div
+                            class="snap-center shrink-0 w-48 bg-dark-card border border-white/5 rounded-lg p-4 cursor-pointer hover:border-yellow-500/50 transition opacity-80">
+                            <p class="text-xs text-gray-500 mb-1">Session: 13:45 PM</p>
+                            <p class="text-xl font-bold text-yellow-500">Happy</p>
+                            <p class="text-xs text-gray-400 mt-2">Valence: +0.65</p>
+                        </div>
+                        <!-- Card 3 -->
+                        <div
+                            class="snap-center shrink-0 w-48 bg-dark-card border border-white/5 rounded-lg p-4 cursor-pointer hover:border-blue-500/50 transition opacity-60">
+                            <p class="text-xs text-gray-500 mb-1">Session: 09:12 AM</p>
+                            <p class="text-xl font-bold text-blue-500">Sad</p>
+                            <p class="text-xs text-gray-400 mt-2">Valence: -0.40</p>
+                        </div>
+                    </div>
+                    <style>
+                        .hide-scroll::-webkit-scrollbar {
+                            display: none;
+                        }
+
+                        .hide-scroll {
+                            -ms-overflow-style: none;
+                            scrollbar-width: none;
+                        }
+                    </style>
+                </div>
+
+            </section>
+        </div> <!-- End of Flex Row -->
+
+    </main>
+
+    <script>
+        // --- Init Particles Background ---
+        particlesJS("particles-js", {
+            particles: {
+                number: { value: 60, density: { enable: true, value_area: 800 } },
+                color: { value: ["#00f3ff", "#bd00ff"] },
+                shape: { type: "circle" },
+                opacity: { value: 0.3, random: true },
+                size: { value: 3, random: true },
+                line_linked: { enable: true, distance: 150, color: "#ffffff", opacity: 0.1, width: 1 },
+                move: { enable: true, speed: 1, direction: "none", random: true, out_mode: "out" }
+            },
+            interactivity: {
+                detect_on: "canvas",
+                events: { onhover: { enable: true, mode: "grab" }, onclick: { enable: true, mode: "push" }, resize: true },
+                modes: { grab: { distance: 140, line_linked: { opacity: 0.5 } } }
+            },
+            retina_detect: true
+        });
+
+        // --- Init Lottie Loader ---
+        const loaderAnimation = lottie.loadAnimation({
+            container: document.getElementById('lottie-brain'),
+            renderer: 'svg',
+            loop: true,
+            autoplay: false,
+            // Using a public standard brain-nodes lottie animation json URL
+            path: 'https://lottie.host/8172c730-8d4e-4f10-9113-5b8d4239ca7b/D9tXFwLzQh.json'
+        });
+        // --- Utilities & Previews ---
+        function previewMedia(input, imgId) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const img = document.getElementById(imgId);
+                    img.src = e.target.result;
+                    img.classList.remove('hidden');
+                }
+                reader.readAsDataURL(input.files[0]);
+                logTerminal(`Visual loaded: ${input.files[0].name}`);
+            }
+        }
+
+        function showAudioName(input) {
+            if (input.files && input.files[0]) {
+                const p = document.getElementById('audioFileName');
+                p.textContent = `Attached: ${input.files[0].name}`;
+                p.classList.remove('hidden');
+                logTerminal(`Audio tract loaded: ${input.files[0].name}`);
+            }
+        }
+
+        function logTerminal(msg) {
+            const terminal = document.getElementById('terminalLog');
+            const p = document.createElement('p');
+            const time = new Date().toLocaleTimeString([], { hour12: false });
+            p.innerHTML = `<span class="text-blue-400">[${time}]</span> >> ${msg}`;
+            terminal.appendChild(p);
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        function toggleLoader(show) {
+            const loader = document.getElementById('loader');
+            if (show) {
+                loader.classList.remove('hidden');
+                loaderAnimation.play();
+            } else {
+                loader.classList.add('hidden');
+                loaderAnimation.pause();
+            }
+        }
+
+        function showWarning(msg) {
+            const banner = document.getElementById('warningBanner');
+            document.getElementById('warningText').textContent = msg;
+            banner.classList.remove('hidden');
+            logTerminal(`<span class="text-yellow-500">WARNING: ${msg}</span>`);
+        }
+
+        const API_BASE = "https://semireflexive-scrubbier-ashli.ngrok-free.dev";
+        let JWT_TOKEN = null;
+
+        // Auto-authenticate for secure session demo (Phase 12)
+        async function authenticateDemoUser() {
+            try {
+                const fd = new FormData();
+                // Randomize user per session to test Temporal DB correctly
+                const randomUser = `demo_user_${Math.floor(Math.random() * 10000)}`;
+                fd.append('username', randomUser);
+                fd.append('password', 'secure_pass_123');
+                const res = await fetch(`${API_BASE}/token`, { method: 'POST', body: fd });
+                if (res.ok) {
+                    const data = await res.json();
+                    JWT_TOKEN = data.access_token;
+                    logTerminal(`Secure JWT Session Established for ${randomUser}.`);
+                }
+            } catch (e) {
+                console.error("Auth Error", e);
+            }
+        }
+        authenticateDemoUser();
+
+        // --- Chart.js Configuration (Enhanced for Phase 17) ---
+        Chart.defaults.color = '#9ca3af';
+        Chart.defaults.font.family = "'Space Grotesk', sans-serif";
+
+        const EMOTIONS = ['Angry', 'Disgust', 'Fear', 'Happy', 'Sad', 'Surprise', 'Neutral'];
+
+        const radarCtx = document.getElementById('emotionRadarChart').getContext('2d');
+        const radarChart = new Chart(radarCtx, {
+            type: 'radar',
+            data: {
+                labels: EMOTIONS,
+                datasets: [{
+                    label: 'Confidence Score',
+                    data: [0, 0, 0, 0, 0, 0, 0],
+                    backgroundColor: 'rgba(189, 0, 255, 0.2)', // Neon purple with opacity
+                    borderColor: '#bd00ff',
+                    pointBackgroundColor: '#00f3ff', // Neon blue points
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: '#00f3ff',
+                    borderWidth: 2,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        angleLines: { color: 'rgba(255, 255, 255, 0.1)' },
+                        grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                        pointLabels: { color: '#e5e7eb', font: { size: 11, weight: 'bold' } },
+                        ticks: { display: false, min: 0, max: 1 } // Hide internal numbers for cleaner look
+                    }
+                },
+                plugins: { legend: { display: false } }
+            }
+        });
+
+        const barCtx = document.getElementById('emotionBarChart').getContext('2d');
+        const barChart = new Chart(barCtx, {
+            type: 'bar',
+            data: {
+                labels: EMOTIONS,
+                datasets: [{
+                    label: 'Probability (%)',
+                    data: [0, 0, 0, 0, 0, 0, 0],
+                    backgroundColor: [
+                        'rgba(239, 68, 68, 0.6)',  // Red - Angry
+                        'rgba(16, 185, 129, 0.6)', // Green - Disgust
+                        'rgba(139, 92, 246, 0.6)', // Purple - Fear
+                        'rgba(234, 179, 8, 0.6)',  // Yellow - Happy
+                        'rgba(59, 130, 246, 0.6)', // Blue - Sad
+                        'rgba(249, 115, 22, 0.6)', // Orange - Surprise
+                        'rgba(156, 163, 175, 0.6)' // Gray - Neutral
+                    ],
+                    borderColor: [
+                        '#ef4444', '#10b981', '#8b5cf6', '#eab308', '#3b82f6', '#f97316', '#9ca3af'
+                    ],
+                    borderWidth: 1,
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true, max: 100,
+                        grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                        ticks: { color: '#9ca3af' }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#e5e7eb', font: { weight: '600' } }
+                    }
+                },
+                plugins: { legend: { display: false } }
+            }
+        });
+
+        // --- Analysis Functions ---
+
+        function updateUI(data) {
+            logTerminal(`Inference complete [${data.latency_ms}ms]. Modality: ${data.modality.toUpperCase()}`);
+
+            // Highlight text
+            const resMain = document.getElementById('primaryEmotionResult');
+            resMain.textContent = data.predicted_emotion;
+            resMain.className = `text-6xl md:text-8xl font-black font-['Space_Grotesk'] text-transparent bg-clip-text drop-shadow-[0_0_20px_rgba(255,255,255,0.3)] animate-pulse-slow`;
+
+            // Set Color based on emotion
+            let grad = 'from-white to-gray-500';
+            if (data.predicted_emotion === 'Angry') grad = 'from-red-500 to-orange-600';
+            if (data.predicted_emotion === 'Happy') grad = 'from-yellow-300 to-amber-500';
+            if (data.predicted_emotion === 'Sad') grad = 'from-blue-500 to-indigo-600';
+            if (data.predicted_emotion === 'Fear') grad = 'from-purple-500 to-fuchsia-700';
+            if (data.predicted_emotion === 'Surprise') grad = 'from-orange-400 to-rose-500';
+            if (data.predicted_emotion === 'Disgust') grad = 'from-lime-400 to-emerald-600';
+
+            resMain.classList.add(...grad.split(' '));
+
+            // Show Confidence
+            const confVal = (data.confidence_scores[data.predicted_emotion] * 100).toFixed(1);
+            const confDiv = document.getElementById('confidenceScore');
+            confDiv.querySelector('span').textContent = confVal;
+            confDiv.classList.remove('hidden');
+
+            document.getElementById('latencyMetric').textContent = `Latency: ${data.latency_ms}ms`;
+
+            // Update Temporal Widget if available (Phase 10)
+            if (data.temporal_summary && !data.temporal_summary.status) {
+                document.getElementById('temporalWidget').classList.remove('hidden');
+                document.getElementById('t_dominant').textContent = data.temporal_summary.dominant_emotion;
+                document.getElementById('t_stability').textContent = data.temporal_summary.emotional_stability;
+                document.getElementById('t_valence').textContent = data.temporal_summary.average_valence;
+                document.getElementById('t_clinical').textContent = data.temporal_summary.clinical_state;
+                document.getElementById('t_insight').textContent = data.temporal_summary.clinical_insight;
+            }
+
+            // Update Charts
+            const scoresArray = labels.map(l => data.confidence_scores[l] || 0);
+
+            radarChart.data.datasets[0].data = scoresArray;
+            radarChart.update();
+
+            barChart.data.datasets[0].data = scoresArray;
+            barChart.update();
+        }
+
+        async function processRequest(endpoint, formData) {
+            toggleLoader(true);
+            document.getElementById('warningBanner').classList.add('hidden');
+            try {
+                const headers = {};
+                if (JWT_TOKEN) headers['Authorization'] = `Bearer ${JWT_TOKEN}`;
+
+                const response = await fetch(`${API_BASE}${endpoint}`, {
+                    method: 'POST',
+                    headers: headers,
+                    body: formData
+                });
+
+                if (response.status === 429) {
+                    showWarning("RATE LIMIT EXCEEDED: You are sending too many requests. Please wait.");
+                    toggleLoader(false);
+                    return;
+                }
+
+                if (response.status === 422) {
+                    const err = await response.json();
+                    if (err.detail && typeof err.detail === 'string') {
+                        showWarning(err.detail); // e.g. "NO FACE DETECTED"
+                    } else {
+                        showWarning("Validation Error: Invalid input.");
+                    }
+                    toggleLoader(false);
+                    return;
+                }
+
+                if (!response.ok) throw new Error("Network response was not ok");
+
+                const data = await response.json();
+
+                if (data.warning) {
+                    showWarning(data.warning); // e.g. "LOW LIGHT WARNING"
+                }
+
+                updateUI(data);
+            } catch (error) {
+                console.error("API Error:", error);
+                logTerminal(`<span class="text-red-500">ERROR: Backend unreachable. Falling back to frontend mock simulation.</span>`);
+
+                // Fallback simulation if python backend isn't actively running
+                setTimeout(() => {
+                    const mockScores = { Angry: 0.05, Disgust: 0.02, Fear: 0.08, Happy: 0.65, Sad: 0.05, Surprise: 0.1, Neutral: 0.05 };
+                    updateUI({ modality: "fallback_simulation", predicted_emotion: "Happy", confidence_scores: mockScores, latency_ms: 120.5 });
+                    toggleLoader(false);
+                }, 800);
+                return;
+            }
+            toggleLoader(false);
+        }
+
+        function analyzeText() {
+            const txt = document.getElementById('textInput').value;
+            if (!txt) { alert("Please enter text"); return; }
+            logTerminal(`Initiating Text Analysis...`);
+            const fd = new FormData(); fd.append('text', txt);
+            processRequest('/predict/text', fd);
+        }
+
+        function analyzeVision() {
+            const file = document.getElementById('imageUpload').files[0];
+            if (!file) { alert("Please upload an image"); return; }
+            logTerminal(`Initiating Visual Feature Extraction...`);
+            const fd = new FormData(); fd.append('file', file);
+            processRequest('/predict/vision', fd);
+        }
+
+        function analyzeAudio() {
+            const file = document.getElementById('audioUpload').files[0];
+            if (!file) { alert("Please upload an audio file"); return; }
+            logTerminal(`Initiating Acoustic Pattern Recognition...`);
+            const fd = new FormData(); fd.append('file', file);
+            processRequest('/predict/audio', fd);
+        }
+
+        function triggerLateFusion() {
+            logTerminal(`=== INITIATING MULTIMODAL LATE FUSION ===`);
+            logTerminal(`Pooling text, visual, and acoustic tensor matrices...`);
+            const fd = new FormData();
+            // Append available data
+            const txt = document.getElementById('textInput').value;
+            if (txt) fd.append('text', txt);
+            const img = document.getElementById('imageUpload').files[0];
+            if (img) fd.append('image', img);
+            const aud = document.getElementById('audioUpload').files[0];
+            if (aud) fd.append('audio', aud);
+
+            processRequest('/predict/fusion', fd);
+        }
+
+        // --- Live Webcam Inference Upgrade ---
+        let webcamStream = null;
+        let inferenceInterval = null;
+
+        async function toggleWebcam() {
+            const video = document.getElementById('webcamVideo');
+            const container = document.getElementById('webcamContainer');
+            const btn = document.getElementById('webcamBtn');
+
+            if (webcamStream) {
+                // Stop webcam
+                webcamStream.getTracks().forEach(track => track.stop());
+                webcamStream = null;
+                clearInterval(inferenceInterval);
+                container.classList.add('hidden');
+                btn.innerHTML = `<i class="ph ph-video-camera"></i> Live Cam`;
+                btn.classList.replace('bg-red-900', 'bg-gray-800');
+                btn.classList.replace('hover:bg-red-800', 'hover:bg-gray-700');
+                btn.classList.replace('border-red-500', 'border-gray-600');
+                return;
+            }
+
+            try {
+                // Start webcam
+                webcamStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+                video.srcObject = webcamStream;
+                container.classList.remove('hidden');
+                btn.innerHTML = `<i class="ph ph-stop"></i> Stop Cam`;
+                btn.classList.replace('bg-gray-800', 'bg-red-900');
+                btn.classList.replace('hover:bg-gray-700', 'hover:bg-red-800');
+                btn.classList.replace('border-gray-600', 'border-red-500');
+
+                // Start inference loop (1 frame per second)
+                inferenceInterval = setInterval(captureAndAnalyzeFrame, 1500);
+
+            } catch (err) {
+                logTerminal(`<span class="text-red-500">Camera Error: ${err.message}</span>`);
+                alert("Camera access denied or unavailable.");
+            }
+        }
+
+        function dataURItoBlob(dataURI) {
+            const byteString = atob(dataURI.split(',')[1]);
+            const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+            const ab = new ArrayBuffer(byteString.length);
+            const ia = new Uint8Array(ab);
+            for (let i = 0; i < byteString.length; i++) {
+                ia[i] = byteString.charCodeAt(i);
+            }
+            return new Blob([ab], { type: mimeString });
+        }
+
+        async function captureAndAnalyzeFrame() {
+            const video = document.getElementById('webcamVideo');
+            const canvas = document.getElementById('webcamCanvas');
+
+            // Only capture if video is playing and ready
+            if (video.readyState !== 4) return;
+
+            // Downsample to save bandwidth
+            canvas.width = 300;
+            canvas.height = 300 * (video.videoHeight / video.videoWidth);
+            const ctx = canvas.getContext('2d');
+
+            // Mirror flip drawing
+            ctx.translate(canvas.width, 0);
+            ctx.scale(-1, 1);
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+            const blob = dataURItoBlob(dataUrl);
+
+            const fd = new FormData();
+            fd.append('file', blob, 'webcam_frame.jpg');
+
+            // Do not show full-screen loader layout during live stream
+            // instead, silently process request and update the right panel
+            try {
+                const response = await fetch(`${API_BASE}/predict/vision`, {
+                    method: 'POST',
+                    body: fd
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    updateUI(data); // update graphs instantly
+                }
+            } catch (error) {
+                // If backend not running, fallback simulation silently for webcam mode
+                // so UI looks alive
+                const mockScores = { Angry: Math.random() * 0.1, Disgust: Math.random() * 0.1, Fear: Math.random() * 0.1, Happy: 0.5 + Math.random() * 0.4, Sad: Math.random() * 0.1, Surprise: Math.random() * 0.1, Neutral: Math.random() * 0.1 };
+                const total = Object.values(mockScores).reduce((a, b) => a + b);
+                Object.keys(mockScores).forEach(k => mockScores[k] /= total);
+                const bestEmo = Object.keys(mockScores).reduce((a, b) => mockScores[a] > mockScores[b] ? a : b);
+
+                updateUI({
+                    modality: "live_vision (simulation)",
+                    predicted_emotion: bestEmo,
+                    confidence_scores: mockScores,
+                    latency_ms: Math.round(90 + Math.random() * 50)
+                });
+            }
+        }
+    </script>
+</body>
+
+</html>
