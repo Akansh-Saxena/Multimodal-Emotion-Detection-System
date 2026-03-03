@@ -497,7 +497,10 @@
             logTerminal(`<span class="text-yellow-500">WARNING: ${msg}</span>`);
         }
 
-        const API_BASE = "https://multimodal-emotion-detection-system.onrender.com";
+        // --- API CONFIGURATION ---
+        // Change this URL to your Localtunnel, Hugging Face Spaces, or Render URL when deploying over the internet.
+        // Example: https://your-huggingface-space.hf.space
+        const API_BASE = "https://saxenaakansh-multimodal-emotion-app.hf.space";
         let JWT_TOKEN = null;
 
         // Auto-authenticate for secure session demo (Phase 12)
@@ -508,6 +511,7 @@
                 const randomUser = `demo_user_${Math.floor(Math.random() * 10000)}`;
                 fd.append('username', randomUser);
                 fd.append('password', 'secure_pass_123');
+
                 const res = await fetch(`${API_BASE}/token`, { method: 'POST', body: fd });
                 if (res.ok) {
                     const data = await res.json();
