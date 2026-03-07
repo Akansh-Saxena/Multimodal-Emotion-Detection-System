@@ -414,7 +414,7 @@ def login_for_access_token(request: Request, form_data: OAuth2PasswordRequestFor
 
 @limiter.limit("10/minute")
 
-async def predict_vision(request: Request, file: UploadFile = File(...), current_user: DBUser = Depends(get_current_user), db: Session = Depends(get_db)):
+async def predict_vision(request: Request, file: UploadFile = File(...), db: Session = Depends(get_db)):
 
     if not file.content_type.startswith("image/"):
 
@@ -500,7 +500,7 @@ async def predict_vision(request: Request, file: UploadFile = File(...), current
 
 @limiter.limit("20/minute")
 
-async def predict_text(request: Request, text: str = Form(...), current_user: DBUser = Depends(get_current_user)):
+async def predict_text(request: Request, text: str = Form(...)):
 
     if not text.strip():
 
@@ -524,7 +524,7 @@ async def predict_text(request: Request, text: str = Form(...), current_user: DB
 
 @limiter.limit("10/minute")
 
-async def predict_audio(request: Request, file: UploadFile = File(...), current_user: DBUser = Depends(get_current_user)):
+async def predict_audio(request: Request, file: UploadFile = File(...)):
 
     warning_msg = None
 
