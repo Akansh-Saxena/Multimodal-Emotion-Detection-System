@@ -438,15 +438,7 @@
             retina_detect: true
         });
 
-        // --- Init Lottie Loader ---
-        const loaderAnimation = lottie.loadAnimation({
-            container: document.getElementById('lottie-brain'),
-            renderer: 'svg',
-            loop: true,
-            autoplay: false,
-            // Using a public standard brain-nodes lottie animation json URL
-            path: 'https://lottie.host/8172c730-8d4e-4f10-9113-5b8d4239ca7b/D9tXFwLzQh.json'
-        });
+        // Loader disabled for fallback
         // --- Utilities & Previews ---
         function previewMedia(input, imgId) {
             if (input.files && input.files[0]) {
@@ -480,14 +472,7 @@
         }
 
         function toggleLoader(show) {
-            const loader = document.getElementById('loader');
-            if (show) {
-                loader.classList.remove('hidden');
-                loaderAnimation.play();
-            } else {
-                loader.classList.add('hidden');
-                loaderAnimation.pause();
-            }
+            // Safe stub
         }
 
         function showWarning(msg) {
@@ -501,28 +486,7 @@
         // Change this URL to your Localtunnel, Hugging Face Spaces, or Render URL when deploying over the internet.
         // Example: https://your-huggingface-space.hf.space
         const API_BASE = "https://saxenaakansh-multimodal-emotion-app.hf.space";
-        let JWT_TOKEN = null;
-
-        // Auto-authenticate for secure session demo (Phase 12)
-        async function authenticateDemoUser() {
-            try {
-                const fd = new FormData();
-                // Randomize user per session to test Temporal DB correctly
-                const randomUser = `demo_user_${Math.floor(Math.random() * 10000)}`;
-                fd.append('username', randomUser);
-                fd.append('password', 'secure_pass_123');
-
-                const res = await fetch(`${API_BASE}/token`, { method: 'POST', body: fd });
-                if (res.ok) {
-                    const data = await res.json();
-                    JWT_TOKEN = data.access_token;
-                    logTerminal(`Secure JWT Session Established for ${randomUser}.`);
-                }
-            } catch (e) {
-                console.error("Auth Error", e);
-            }
-        }
-        authenticateDemoUser();
+        // No JWT required for public inference
 
         // --- Chart.js Configuration (Enhanced for Phase 17) ---
         Chart.defaults.color = '#9ca3af';
@@ -657,14 +621,8 @@
             toggleLoader(true);
             document.getElementById('warningBanner').classList.add('hidden');
             try {
-                const headers = {
-                    'ngrok-skip-browser-warning': 'true'
-                };
-                if (JWT_TOKEN) headers['Authorization'] = `Bearer ${JWT_TOKEN}`;
-
                 const response = await fetch(`${API_BASE}${endpoint}`, {
                     method: 'POST',
-                    headers: headers,
                     body: formData
                 });
 
