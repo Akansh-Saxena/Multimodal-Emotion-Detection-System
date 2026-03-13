@@ -29,3 +29,11 @@ passlib[bcrypt]>=1.7.4
 python-jose[cryptography]>=3.3.0
 slowapi
 python-multipart
+
+# Misc
+tqdm>=4.66.1
+
+# UI
+plotly>=5.18.0
+streamlit-extras>=0.3.6
+requests>=2.31.0
