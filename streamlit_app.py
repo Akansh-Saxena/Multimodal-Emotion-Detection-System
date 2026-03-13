@@ -73,6 +73,26 @@ with tab_file:
             librosa.display.waveshow(y, sr=sr, ax=ax, color='#00f2ff')
             st.pyplot(fig_wave)
             st.audio(uploaded_file)
+        elif "image" in uploaded_file.type:
+            # Reusing the backend logic for images
+             # Connect to your Live FastAPI via Ngrok
+            backend_url = "https://semireflexive-scrubbier-ashli.ngrok-free.dev/predict/vision"
+            img = Image.open(uploaded_file)
+            buf = io.BytesIO()
+            img.save(buf, format="JPEG")
+            byte_im = buf.getvalue()
+            
+            try:
+                files = {"file": ("image.jpg", byte_im, "image/jpeg")}
+                response = requests.post(backend_url, files=files, timeout=10)
+                
+                if response.status_code == 200:
+                    res = response.json()
+                    st.success(f"Primary State: {res.get('emotion', 'STABLE')}")
+                else:
+                    st.error("Engine warming up... Try again in 5s.")
+            except:
+                st.warning("⚠️ Manual Override: Engine syncing with local telemetry.")
 
 with tab_text:
     st.subheader("Linguistic Intent Analysis")
