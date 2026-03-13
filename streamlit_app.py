@@ -1,29 +1,33 @@
 import streamlit as st
 import requests
+from PIL import Image
+import io
 
-st.set_page_config(page_title="Multimodal Emotion AI", page_icon="🧠")
+# ... (keep your title and header code) ...
 
-st.title("🧠 Multimodal Emotion Detection")
-st.markdown("Developed by **Akansh Saxena** | J.K. Institute of Applied Physics & Technology")
+# REPLACE the backend_url with your LIVE Streamlit URL but change '.streamlit.app' to '.streamlit.app/predict'
+# For now, we will use a relative path trick:
+backend_url = "https://akansh-saxena-multimodal-emotion-detection-system-srcapi-tkz2zh.streamlit.app/predict"
 
-st.sidebar.header("Settings")
-backend_url = "http://localhost:8501" # This will connect to your api.py
+if img_file:
+    st.info("🚀 Analyzing your emotion in real-time...")
+    
+    # Convert the camera photo to bytes
+    img = Image.open(img_file)
+    buf = io.BytesIO()
+    img.save(buf, format="JPEG")
+    byte_im = buf.getvalue()
 
-# --- UI Layout ---
-tab1, tab2 = st.tabs(["🎥 Video/Image Analysis", "🎤 Audio Analysis"])
-
-with tab1:
-    st.subheader("Visual Emotion Recognition")
-    img_file = st.camera_input("Capture image for analysis")
-    if img_file:
-        st.info("Sending data to FastAPI backend...")
-        # Add your backend calling logic here
-
-with tab2:
-    st.subheader("Voice Emotion Analysis")
-    audio_file = st.file_uploader("Upload audio clip", type=["wav", "mp3"])
-    if audio_file:
-        st.success("Audio received. Processing frequencies...")
-
-st.divider()
-st.caption("© 2026 Multimodal AI Project - Final Year B.Tech CSE")
+    # Send it to your FastAPI backend
+    try:
+        files = {"file": ("image.jpg", byte_im, "image/jpeg")}
+        response = requests.post(backend_url, files=files, timeout=10)
+        
+        if response.status_code == 200:
+            result = response.json()
+            st.success(f"✅ Emotion Detected: {result['emotion']}")
+            st.write(f"Confidence: {result['confidence']}%")
+        else:
+            st.error("Backend is busy. Retrying in 2s...")
+    except Exception as e:
+        st.warning("Connecting to Engine... Ensure src/api.py is running in the background.")
