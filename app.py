@@ -9,6 +9,7 @@ import requests
 import librosa
 import librosa.display
 import matplotlib.pyplot as plt
+import torch  # <-- CRITICAL: This fixes the NameError
 from transformers import pipeline
 import mediapipe as mp
 from streamlit_webrtc import webrtc_streamer, VideoTransformerBase, RTCConfiguration
