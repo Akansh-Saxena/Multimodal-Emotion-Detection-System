@@ -38,3 +38,4 @@ python-multipart>=0.0.9
 # --- Utilities ---
 tqdm>=4.66.2
 matplotlib>=3.8.3
+app.py
