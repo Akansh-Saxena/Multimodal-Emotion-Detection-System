@@ -61,9 +61,11 @@ with col_title2:
 # ==========================================
 @st.cache_resource(show_spinner="Warping AI Manifold...")
 def load_heavy_engines():
+    # 1. Text Engine
     nlp_model = pipeline("text-classification", model="distilbert-base-uncased-finetuned-sst-2-english")
     
-    from mediapipe.python.solutions import face_mesh as mp_face_mesh
+    # 2. Vision Engine (Standard Stable Syntax)
+    mp_face_mesh = mp.solutions.face_mesh
     mp_mesh = mp_face_mesh.FaceMesh(
         max_num_faces=1, 
         refine_landmarks=True,
