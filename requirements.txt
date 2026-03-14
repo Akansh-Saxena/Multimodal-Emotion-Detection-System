@@ -3,15 +3,14 @@ streamlit>=1.35.0
 streamlit-webrtc>=0.64.0
 requests>=2.31.0
 
-# --- Deep Learning (Optimized for Cloud RAM) ---
---extra-index-url https://download.pytorch.org/whl/cpu
-torch==2.2.1
-torchvision==0.17.1
-torchaudio==2.2.1
+# --- Deep Learning (Stable CPU Versions) ---
+torch
+torchvision
+torchaudio
 transformers>=4.38.0
 mediapipe>=0.10.10
 
-# --- The Cloud-Native Fix (Includes internal drivers) ---
+# --- Cloud-Native Graphics Fix ---
 opencv-contrib-python-headless>=4.9.0.80
 Pillow>=10.2.0
 librosa>=0.10.1
@@ -21,6 +20,3 @@ soundfile>=0.12.1
 numpy>=1.26.4
 plotly>=5.19.0
 matplotlib>=3.8.3
-
-# --- Security & Utils ---
-slowapi>=0.1.9
