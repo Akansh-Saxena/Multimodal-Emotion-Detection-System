@@ -1,9 +1,23 @@
 import os
-# CRITICAL: Forces "Headless" mode to bypass Linux graphics driver conflicts
+import sys
+import subprocess
+
+# ==========================================
+# 0. THE "NUCLEAR" AUTO-FIX FOR libGL ERROR
+# ==========================================
+# MediaPipe secretly installs a broken OpenCV on Streamlit Cloud. 
+# This script detects the libGL error and aggressively patches it at runtime.
+try:
+    import cv2
+    cv2.VideoCapture # Test if it loaded correctly
+except (ImportError, AttributeError):
+    subprocess.check_call([sys.executable, "-m", "pip", "uninstall", "-y", "opencv-python", "opencv-contrib-python", "opencv-python-headless"])
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "opencv-python-headless==4.9.0.80"])
+    import cv2
+
 os.environ["QT_QPA_PLATFORM"] = "offscreen"
 
 import streamlit as st
-import cv2
 import numpy as np
 import plotly.graph_objects as go
 import requests
@@ -24,10 +38,8 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# RTC Configuration for stable STUN/TURN (Fixes Camera Lag)
 RTC_CONFIG = RTCConfiguration({"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]})
 
-# Cyber-Glass UI with Neon Accents
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
@@ -59,14 +71,12 @@ with col_title2:
     st.info("🚀 B.Tech CSE Final Year Project\n\nStatus: Production Ready")
 
 # ==========================================
-# 2. GLOBAL AI ENGINES (OPTIMIZED CACHING)
+# 2. GLOBAL AI ENGINES
 # ==========================================
 @st.cache_resource(show_spinner="Warping AI Manifold...")
 def load_heavy_engines():
-    # 1. Text Analysis Engine
     nlp_model = pipeline("text-classification", model="distilbert-base-uncased-finetuned-sst-2-english")
     
-    # 2. Robust Face Mesh Initialization (Explicit Path for Cloud)
     from mediapipe.python.solutions import face_mesh as mp_face_mesh
     mp_mesh = mp_face_mesh.FaceMesh(
         max_num_faces=1, 
@@ -80,13 +90,12 @@ semantic_engine, face_mesh_engine = load_heavy_engines()
 
 @st.cache_data(ttl=600) 
 def fetch_telemetry():
-    # Fetch real-time weather data for Prayagraj
     url = "https://api.open-meteo.com/v1/forecast?latitude=25.43&longitude=81.84&current_weather=true"
     try:
         res = requests.get(url, timeout=5).json()
         return res['current_weather']['temperature'], res['current_weather'].get('surface_pressure', 1013.25)
     except:
-        return 27.0, 1008.0 # Fallback
+        return 27.0, 1008.0
 
 temp, press = fetch_telemetry()
 
@@ -164,6 +173,5 @@ with col_analytics:
     )
     st.plotly_chart(radar, use_container_width=True)
 
-# Footer
 st.markdown("---")
 st.markdown("<p style='text-align: center; color: #8892b0;'>© 2026 Akansh Saxena | J.K. Institute of Applied Physics & Technology</p>", unsafe_allow_html=True)
