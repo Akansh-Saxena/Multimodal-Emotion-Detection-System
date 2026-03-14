@@ -20,7 +20,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Custom Cyber-Glass UI (Fixed Font Rendering)
+# Cyber-Glass UI with Fixed Font Rendering
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
@@ -38,25 +38,25 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Credentials Update
+# Updated Credentials
 st.title("Multimodal Intelligence & Physics Command Center")
 st.markdown("### Lead Architect: **Akansh Saxena** | B.Tech CSE Final Year")
 st.markdown("#### **J.K. Institute of Applied Physics & Technology, Allahabad University**")
-st.info("🚀 System Status: Public Access Enabled | Reliability: 94.2% | Multimodal Fusion: Active")
+st.info("System Status: Public Access Enabled | Reliability: 94.2% | Multimodal Fusion: Active")
 
 # ==========================================
 # GLOBAL SINGLETONS (FOR HEAVY TRAFFIC)
 # ==========================================
 @st.cache_resource(show_spinner=True)
 def load_heavy_engines():
-    # Model is cached globally to handle multiple users without reloading
+    # Cache models globally to prevent memory overflow with multiple users
     nlp = pipeline("text-classification", model="distilbert-base-uncased-finetuned-sst-2-english")
     mesh = mp.solutions.face_mesh.FaceMesh(max_num_faces=1, refine_landmarks=True)
     return nlp, mesh
 
 semantic_engine, face_mesh_engine = load_heavy_engines()
 
-@st.cache_data(ttl=300) # Data stays fresh for 5 mins, reduces API load
+@st.cache_data(ttl=300) # Prevents API spam; fetches fresh data every 5 mins
 def fetch_telemetry():
     url = "https://api.open-meteo.com/v1/forecast?latitude=25.43&longitude=81.84&current_weather=true"
     try:
@@ -104,6 +104,7 @@ with col_physics:
     st.subheader("Antigravity Manifold Simulation")
     x, y = np.linspace(-5, 5, 40), np.linspace(-5, 5, 40)
     X, Y = np.meshgrid(x, y)
+    # Dynamics influenced by real-time Allahabad weather telemetry
     Z = np.sin(np.sqrt(X**2 + Y**2)) + (temp/press) * 10 * np.exp(-(X**2 + Y**2)/8)
     
     fig = go.Figure(data=[go.Surface(z=Z, colorscale='Ice')])
