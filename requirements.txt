@@ -11,7 +11,7 @@ torchaudio==2.2.1
 transformers>=4.38.0
 mediapipe>=0.10.10
 
-# --- The Self-Contained Fix (No packages.txt needed) ---
+# --- THE SELF-CONTAINED FIX ---
 opencv-contrib-python-headless>=4.9.0.80
 Pillow>=10.2.0
 librosa>=0.10.1
