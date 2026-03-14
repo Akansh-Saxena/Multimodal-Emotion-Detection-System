@@ -1,5 +1,5 @@
 import os
-# CRITICAL: Forces the system to run in "Headless" mode to bypass libGL errors
+# CRITICAL: Forces "Headless" mode to bypass Linux graphics driver conflicts
 os.environ["QT_QPA_PLATFORM"] = "offscreen"
 
 import streamlit as st
@@ -24,7 +24,10 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Professional UI Styling
+# RTC Configuration for stable STUN/TURN (Fixes Camera Lag)
+RTC_CONFIG = RTCConfiguration({"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]})
+
+# Cyber-Glass UI with Neon Accents
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
@@ -41,28 +44,29 @@ st.markdown("""
     }
     h1, h2, h3, p, label, .stMetric { color: #e6f1ff!important; }
     .stProgress > div > div > div > div { background-color: #00f2ff; }
+    .stInfo { background-color: rgba(0, 242, 255, 0.1); border: 1px solid #00f2ff; color: #00f2ff; }
 </style>
 """, unsafe_allow_html=True)
 
-# Branding Header - J.K. Institute Identity
+# Branding Header
 st.title("💠 Multimodal Intelligence & Physics Command Center")
-col_header1, col_header2 = st.columns([2, 1])
-with col_header1:
+col_title1, col_title2 = st.columns([2, 1])
+with col_title1:
     st.markdown("### Lead Architect: **Akansh Saxena**")
     st.markdown("#### **J.K. Institute of Applied Physics & Technology**")
     st.write("📍 *University of Allahabad, Prayagraj*")
-with col_header2:
+with col_title2:
     st.info("🚀 B.Tech CSE Final Year Project\n\nStatus: Production Ready")
 
 # ==========================================
-# 2. GLOBAL AI ENGINES (CACHED)
+# 2. GLOBAL AI ENGINES (OPTIMIZED CACHING)
 # ==========================================
-@st.cache_resource(show_spinner="Initializing AI Manifold...")
+@st.cache_resource(show_spinner="Warping AI Manifold...")
 def load_heavy_engines():
-    # Text Engine
+    # 1. Text Analysis Engine
     nlp_model = pipeline("text-classification", model="distilbert-base-uncased-finetuned-sst-2-english")
     
-    # Face Mesh Engine (Stable Initialization)
+    # 2. Robust Face Mesh Initialization (Explicit Path for Cloud)
     from mediapipe.python.solutions import face_mesh as mp_face_mesh
     mp_mesh = mp_face_mesh.FaceMesh(
         max_num_faces=1, 
@@ -73,6 +77,18 @@ def load_heavy_engines():
     return nlp_model, mp_mesh
 
 semantic_engine, face_mesh_engine = load_heavy_engines()
+
+@st.cache_data(ttl=600) 
+def fetch_telemetry():
+    # Fetch real-time weather data for Prayagraj
+    url = "https://api.open-meteo.com/v1/forecast?latitude=25.43&longitude=81.84&current_weather=true"
+    try:
+        res = requests.get(url, timeout=5).json()
+        return res['current_weather']['temperature'], res['current_weather'].get('surface_pressure', 1013.25)
+    except:
+        return 27.0, 1008.0 # Fallback
+
+temp, press = fetch_telemetry()
 
 # ==========================================
 # 3. DASHBOARD ARCHITECTURE
@@ -98,53 +114,56 @@ with col_ingress:
                     )
             return img
 
-    webrtc_streamer(key="vision", video_processor_factory=VisionProcessor)
+    webrtc_streamer(key="vision", video_processor_factory=VisionProcessor, rtc_configuration=RTC_CONFIG)
 
-    st.write("🎙️ **Acoustic Array**")
+    st.write("🎙️ **Acoustic Array Analysis**")
     audio_buffer = st.audio_input("Record for Synthesis")
     if audio_buffer:
         y, sr = librosa.load(io.BytesIO(audio_buffer.read()))
         fig, ax = plt.subplots(figsize=(5, 2))
-        librosa.display.waveshow(y, sr=sr, ax=ax, color="#00f2ff")
+        librosa.display.waveshow(y, sr=sr, ax=ax, color="#00f2ff", alpha=0.8)
         ax.axis('off')
         st.pyplot(fig, transparent=True)
 
 with col_physics:
     st.subheader("🌌 Live Manifold Simulation")
-    x, y = np.linspace(-5, 5, 40), np.linspace(-5, 5, 40)
+    x, y = np.linspace(-6, 6, 50), np.linspace(-6, 6, 50)
     X, Y = np.meshgrid(x, y)
-    Z = np.sin(np.sqrt(X**2 + Y**2)) # Physics placeholder
+    Z = np.sin(np.sqrt(X**2 + Y**2)) + (temp/press) * 15 * np.exp(-(X**2 + Y**2)/10)
     
-    fig = go.Figure(data=[go.Surface(z=Z, colorscale='Ice')])
+    fig = go.Figure(data=[go.Surface(z=Z, colorscale='Viridis', opacity=0.9)])
     fig.update_layout(
         scene=dict(xaxis_visible=False, yaxis_visible=False, zaxis_visible=False),
         paper_bgcolor='rgba(0,0,0,0)', 
         margin=dict(l=0,r=0,b=0,t=0), 
-        height=450
+        height=500
     )
     st.plotly_chart(fig, use_container_width=True)
+    st.caption(f"📍 Location: Prayagraj | Temp: {temp}°C | Pressure: {press} hPa")
 
 with col_analytics:
     st.subheader("📊 Cognitive Analytics")
     intent_input = st.text_input("Semantic Query Synthesis:")
     if intent_input:
         res = semantic_engine(intent_input)[0]
-        st.metric("NLP Result", res['label'], f"{res['score']*100:.1f}% Confidence")
+        st.metric("NLP Result", res['label'], f"{res['score']*100:.2f}% Match")
         st.progress(res['score'])
 
-    st.write("⚡ **Fusion Stability Matrix**")
+    st.write("⚡ **Fusion Stability**")
     radar = go.Figure(data=go.Scatterpolar(
         r=[95, 92, 98, 90, 94],
         theta=['Vision','Audio','Text','Fusion','Stability'],
-        fill='toself', line_color='#00f2ff'
+        fill='toself', fillcolor='rgba(0, 242, 255, 0.3)', line_color='#00f2ff'
     ))
     radar.update_layout(
         polar=dict(bgcolor='rgba(10,25,47,0.5)', radialaxis=dict(visible=False)), 
         paper_bgcolor='rgba(0,0,0,0)', 
         font_color='#e6f1ff', 
-        height=300
+        height=350,
+        margin=dict(l=20, r=20, t=20, b=20)
     )
     st.plotly_chart(radar, use_container_width=True)
 
+# Footer
 st.markdown("---")
 st.markdown("<p style='text-align: center; color: #8892b0;'>© 2026 Akansh Saxena | J.K. Institute of Applied Physics & Technology</p>", unsafe_allow_html=True)
