@@ -11,8 +11,8 @@ torchaudio==2.2.1
 transformers>=4.38.0
 mediapipe>=0.10.10
 
-# --- Image, Video & Audio Processing ---
-opencv-python-headless>=4.9.0
+# --- The Cloud-Native Fix (Updated for Debian Trixie) ---
+opencv-contrib-python-headless>=4.9.0.80
 Pillow>=10.2.0
 librosa>=0.10.1
 soundfile>=0.12.1
