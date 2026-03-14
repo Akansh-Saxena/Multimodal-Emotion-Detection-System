@@ -3,14 +3,15 @@ opencv-python-headless==4.9.0.80
 Pillow>=10.2.0
 
 # --- Core UI & Deployment ---
-streamlit>=1.35.0
+streamlit>=1.50.0
 streamlit-webrtc>=0.64.0
 requests>=2.31.0
 
 # --- Deep Learning (Stable CPU Versions) ---
-torch --extra-index-url https://download.pytorch.org/whl/cpu
-torchvision --extra-index-url https://download.pytorch.org/whl/cpu
-torchaudio --extra-index-url https://download.pytorch.org/whl/cpu
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.2.1
+torchvision==0.17.1
+torchaudio==2.2.1
 transformers>=4.38.0
 mediapipe>=0.10.10
 
@@ -18,7 +19,7 @@ mediapipe>=0.10.10
 librosa>=0.10.1
 soundfile>=0.12.1
 
-# --- Data Science & Analytics ---
-numpy>=1.26.4
+# --- Data Science & Analytics (Stability Pins) ---
+numpy>=1.26.4,<2.0.0
 plotly>=5.19.0
 matplotlib>=3.8.3
