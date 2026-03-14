@@ -1,8 +1,7 @@
 streamlit
 streamlit-webrtc
 opencv-python-headless==4.9.0.80
-opencv-contrib-python-headless==4.9.0.80
-mediapipe
+mediapipe==0.10.11
 transformers
 torch
 librosa
