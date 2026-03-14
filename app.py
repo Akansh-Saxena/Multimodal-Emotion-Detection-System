@@ -24,7 +24,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# RTC Configuration for stable STUN/TURN (Fixes Camera Lag)
+# RTC Configuration for stable STUN/TURN (Fixes Camera Lag on mobile/unstable networks)
 RTC_CONFIG = RTCConfiguration({"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]})
 
 # Cyber-Glass UI with Neon Accents
@@ -65,12 +65,14 @@ with col_title2:
 def load_heavy_engines():
     # Text Analysis Engine
     nlp_model = pipeline("text-classification", model="distilbert-base-uncased-finetuned-sst-2-english")
-    # Face Mesh Engine
-    mp_mesh = mp.solutions.face_mesh.FaceMesh(
+    
+    # Robust Face Mesh Initialization
+    mp_face_mesh = mp.solutions.face_mesh
+    mp_mesh = mp_face_mesh.FaceMesh(
         max_num_faces=1, 
         refine_landmarks=True,
-        min_detection_confidence=0.6,
-        min_tracking_confidence=0.6
+        min_detection_confidence=0.5,
+        min_tracking_confidence=0.5
     )
     return nlp_model, mp_mesh
 
@@ -83,7 +85,7 @@ def fetch_telemetry():
         res = requests.get(url, timeout=5).json()
         return res['current_weather']['temperature'], res['current_weather'].get('surface_pressure', 1013.25)
     except:
-        return 27.0, 1008.0 # Realistic Allahabad fallback
+        return 27.0, 1008.0 # Fallback for offline/timeout
 
 temp, press = fetch_telemetry()
 
@@ -116,7 +118,7 @@ with col_ingress:
 
     # 🎤 AUDIO LAYER
     st.write("🎙️ **Acoustic Array Analysis**")
-    audio_buffer = st.audio_input("Record for Emotion Synthesis")
+    audio_buffer = st.audio_input("Record for Synthesis")
     if audio_buffer:
         y, sr = librosa.load(io.BytesIO(audio_buffer.read()))
         fig, ax = plt.subplots(figsize=(5, 2))
@@ -145,16 +147,14 @@ with col_analytics:
     st.subheader("📊 Cognitive Analytics")
     
     # 📝 TEXT LAYER
-    intent_input = st.text_input("Input Query for NLP Synthesis:")
+    intent_input = st.text_input("Semantic Query Synthesis:")
     if intent_input:
         res = semantic_engine(intent_input)[0]
-        label = res['label']
-        score = res['score']
-        st.metric("NLP Sentiment Result", label, f"{score*100:.2f}% Match")
-        st.progress(score)
+        st.metric("NLP Result", res['label'], f"{res['score']*100:.2f}% Match")
+        st.progress(res['score'])
 
     # 📈 FUSION MATRIX
-    st.write("⚡ **Multimodal Fusion Stability**")
+    st.write("⚡ **Fusion Stability**")
     radar = go.Figure(data=go.Scatterpolar(
         r=[95, 92, 98, 90, 94],
         theta=['Vision','Audio','Text','Fusion','Stability'],
