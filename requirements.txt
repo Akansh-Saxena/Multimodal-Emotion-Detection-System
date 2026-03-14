@@ -1,15 +1,13 @@
---extra-index-url https://download.pytorch.org/whl/cpu
-torch
 streamlit
 streamlit-webrtc
 opencv-python-headless==4.9.0.80
+opencv-contrib-python-headless==4.9.0.80
 mediapipe
 transformers
+torch
 librosa
 soundfile
 numpy<2.0.0
 plotly
 matplotlib
 requests
-libgl1
-libglib2.0-0
