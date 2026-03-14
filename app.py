@@ -1,5 +1,7 @@
 import os
+# CRITICAL: Bypasses Linux GUI/Driver requirements for Cloud Deployment
 os.environ["QT_QPA_PLATFORM"] = "offscreen"
+
 import streamlit as st
 import cv2
 import numpy as np
@@ -22,7 +24,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Professional Cyber-Glass UI & JetBrains Font
+# Professional Cyber-Glass UI
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
@@ -42,7 +44,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Project Identity - J.K. Institute Branding
+# Project Identity
 st.title("💠 Multimodal Intelligence & Physics Command Center")
 st.markdown("### Lead Architect: **Akansh Saxena** | B.Tech CSE Final Year")
 st.markdown("#### **J.K. Institute of Applied Physics & Technology**")
@@ -54,10 +56,7 @@ st.info("🚀 System Status: Public Access Enabled | Reliability: 94.2% | Multim
 # ==========================================
 @st.cache_resource(show_spinner="Initializing AI Manifold...")
 def load_heavy_engines():
-    # Cache models globally to prevent memory overflow on Cloud servers
     nlp_model = pipeline("text-classification", model="distilbert-base-uncased-finetuned-sst-2-english")
-    
-    # Initialize MediaPipe Face Mesh Engine
     mp_mesh = mp.solutions.face_mesh.FaceMesh(
         max_num_faces=1, 
         refine_landmarks=True,
@@ -70,13 +69,12 @@ semantic_engine, face_mesh_engine = load_heavy_engines()
 
 @st.cache_data(ttl=300) 
 def fetch_telemetry():
-    # Fetch real-time atmospheric data for Prayagraj (Lat 25.43, Lon 81.84)
     url = "https://api.open-meteo.com/v1/forecast?latitude=25.43&longitude=81.84&current_weather=true"
     try:
         res = requests.get(url, timeout=3).json()
         return res['current_weather']['temperature'], res['current_weather'].get('surface_pressure', 1013.25)
-    except Exception:
-        return 24.5, 1010.0 # Default fallback if API fails
+    except:
+        return 24.5, 1010.0 
 
 temp, press = fetch_telemetry()
 
@@ -92,7 +90,6 @@ with col_ingress:
     class VisionProcessor(VideoTransformerBase):
         def transform(self, frame):
             img = frame.to_ndarray(format="bgr24")
-            # Convert color space for MediaPipe Processing
             rgb_img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
             results = face_mesh_engine.process(rgb_img)
             
@@ -119,7 +116,6 @@ with col_ingress:
 
 with col_physics:
     st.subheader("🌌 Antigravity Manifold Simulation")
-    # Simulation warped by Prayagraj telemetry (Temp/Pressure ratio)
     x, y = np.linspace(-5, 5, 45), np.linspace(-5, 5, 45)
     X, Y = np.meshgrid(x, y)
     Z = np.sin(np.sqrt(X**2 + Y**2)) + (temp/press) * 12 * np.exp(-(X**2 + Y**2)/9)
