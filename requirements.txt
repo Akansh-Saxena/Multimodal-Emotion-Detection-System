@@ -1,15 +1,12 @@
---extra-index-url https://download.pytorch.org/whl/cpu
-torch==2.2.1
-torchvision==0.17.1
-torchaudio==2.2.1
-streamlit==1.35.0
-streamlit-webrtc==0.64.0
+streamlit
+streamlit-webrtc
 opencv-python-headless==4.9.0.80
-mediapipe==0.10.10
-transformers==4.38.0
-librosa==0.10.1
-soundfile==0.12.1
-numpy==1.26.4
-plotly==5.19.0
-matplotlib==3.8.3
-requests==2.31.0
+mediapipe
+transformers
+librosa
+soundfile
+numpy<2.0.0
+plotly
+matplotlib
+requests
+torch
