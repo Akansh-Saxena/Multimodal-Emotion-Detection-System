@@ -20,7 +20,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Cyber-Glass UI with Fixed Font Rendering
+# Custom Cyber-Glass UI (Character Encoding Fix)
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
@@ -34,36 +34,45 @@ st.markdown("""
         border: 1px solid #00f2ff;
         padding: 20px;
     }
-    h1, h2, h3, p, label { color: #e6f1ff!important; }
+    h1, h2, h3, p, label, .stMetric { color: #e6f1ff!important; }
+    .stProgress > div > div > div > div { background-color: #00f2ff; }
 </style>
 """, unsafe_allow_html=True)
 
-# Updated Credentials
+# Credentials Update - Allahabad University Branding
 st.title("Multimodal Intelligence & Physics Command Center")
 st.markdown("### Lead Architect: **Akansh Saxena** | B.Tech CSE Final Year")
-st.markdown("#### **J.K. Institute of Applied Physics & Technology, Allahabad University**")
-st.info("System Status: Public Access Enabled | Reliability: 94.2% | Multimodal Fusion: Active")
+st.markdown("#### **J.K. Institute of Applied Physics & Technology**")
+st.markdown("##### *University of Allahabad, Prayagraj*")
+st.info("🚀 System Status: Public Access Enabled | Reliability: 94.2% | Multimodal Fusion: Active")
 
 # ==========================================
 # GLOBAL SINGLETONS (FOR HEAVY TRAFFIC)
 # ==========================================
-@st.cache_resource(show_spinner=True)
+@st.cache_resource(show_spinner="Initializing AI Engines...")
 def load_heavy_engines():
-    # Cache models globally to prevent memory overflow with multiple users
+    # Singleton pattern to prevent OOM (Out of Memory) errors on cloud
     nlp = pipeline("text-classification", model="distilbert-base-uncased-finetuned-sst-2-english")
-    mesh = mp.solutions.face_mesh.FaceMesh(max_num_faces=1, refine_landmarks=True)
-    return nlp, mesh
+    # Initialize MediaPipe once
+    mp_face_mesh = mp.solutions.face_mesh.FaceMesh(
+        max_num_faces=1, 
+        refine_landmarks=True,
+        min_detection_confidence=0.5,
+        min_tracking_confidence=0.5
+    )
+    return nlp, mp_face_mesh
 
 semantic_engine, face_mesh_engine = load_heavy_engines()
 
-@st.cache_data(ttl=300) # Prevents API spam; fetches fresh data every 5 mins
+@st.cache_data(ttl=300) 
 def fetch_telemetry():
+    # Dynamic telemetry fetch from Prayagraj
     url = "https://api.open-meteo.com/v1/forecast?latitude=25.43&longitude=81.84&current_weather=true"
     try:
         res = requests.get(url, timeout=3).json()
         return res['current_weather']['temperature'], res['current_weather'].get('surface_pressure', 1013.25)
     except:
-        return 26.5, 1011.0
+        return 24.5, 1010.0 # Standard fallback
 
 temp, press = fetch_telemetry()
 
@@ -79,11 +88,15 @@ with col_ingress:
     class VisionProcessor(VideoTransformerBase):
         def transform(self, frame):
             img = frame.to_ndarray(format="bgr24")
-            results = face_mesh_engine.process(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+            # Image color space conversion for MediaPipe
+            rgb_img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            results = face_mesh_engine.process(rgb_img)
+            
             if results.multi_face_landmarks:
                 for landmarks in results.multi_face_landmarks:
                     mp.solutions.drawing_utils.draw_landmarks(
-                        image=img, landmark_list=landmarks,
+                        image=img, 
+                        landmark_list=landmarks,
                         connections=mp.solutions.face_mesh.FACEMESH_TESSELATION,
                         connection_drawing_spec=mp.solutions.drawing_utils.DrawingSpec(color=(0, 242, 255), thickness=1)
                     )
@@ -92,7 +105,7 @@ with col_ingress:
     webrtc_streamer(key="vision", video_processor_factory=VisionProcessor)
 
     st.markdown("**Acoustic Array**")
-    audio = st.audio_input("Voice Array")
+    audio = st.audio_input("Analyze Voice Pattern")
     if audio:
         y, sr = librosa.load(io.BytesIO(audio.read()))
         fig, ax = plt.subplots(figsize=(5, 1.5))
@@ -102,22 +115,26 @@ with col_ingress:
 
 with col_physics:
     st.subheader("Antigravity Manifold Simulation")
-    x, y = np.linspace(-5, 5, 40), np.linspace(-5, 5, 40)
+    x, y = np.linspace(-5, 5, 45), np.linspace(-5, 5, 45)
     X, Y = np.meshgrid(x, y)
-    # Dynamics influenced by real-time Allahabad weather telemetry
-    Z = np.sin(np.sqrt(X**2 + Y**2)) + (temp/press) * 10 * np.exp(-(X**2 + Y**2)/8)
+    # Physics Manifold warped by Prayagraj atmospheric telemetry
+    Z = np.sin(np.sqrt(X**2 + Y**2)) + (temp/press) * 12 * np.exp(-(X**2 + Y**2)/9)
     
     fig = go.Figure(data=[go.Surface(z=Z, colorscale='Ice')])
-    fig.update_layout(scene=dict(xaxis_visible=False, yaxis_visible=False, zaxis_visible=False),
-                      paper_bgcolor='rgba(0,0,0,0)', margin=dict(l=0,r=0,b=0,t=0), height=450)
+    fig.update_layout(
+        scene=dict(xaxis_visible=False, yaxis_visible=False, zaxis_visible=False),
+        paper_bgcolor='rgba(0,0,0,0)', 
+        margin=dict(l=0,r=0,b=0,t=0), 
+        height=450
+    )
     st.plotly_chart(fig, use_container_width=True)
 
 with col_analytics:
     st.subheader("Cognitive Analytics")
-    intent = st.text_input("Semantic Query (DistilBERT):")
+    intent = st.text_input("Semantic Query Ingestion:")
     if intent:
         res = semantic_engine(intent)[0]
-        st.metric("Detected Intent", res['label'], f"{res['score']*100:.1f}% Accuracy")
+        st.metric("Detected Emotion/Intent", res['label'], f"{res['score']*100:.1f}% Confidence")
         st.progress(res['score'])
 
     st.markdown("**Fusion Matrix**")
@@ -126,5 +143,10 @@ with col_analytics:
         theta=['Vision','Audio','Text','Fusion','Stability'],
         fill='toself', line_color='#00f2ff'
     ))
-    radar.update_layout(polar=dict(bgcolor='rgba(10,25,47,0.5)'), paper_bgcolor='rgba(0,0,0,0)', font_color='#e6f1ff', height=300)
+    radar.update_layout(
+        polar=dict(bgcolor='rgba(10,25,47,0.5)'), 
+        paper_bgcolor='rgba(0,0,0,0)', 
+        font_color='#e6f1ff', 
+        height=300
+    )
     st.plotly_chart(radar, use_container_width=True)
