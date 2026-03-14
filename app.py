@@ -1,3 +1,5 @@
+import os
+os.environ["QT_QPA_PLATFORM"] = "offscreen"
 import streamlit as st
 import cv2
 import numpy as np
@@ -40,7 +42,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Project Identity
+# Project Identity - J.K. Institute Branding
 st.title("💠 Multimodal Intelligence & Physics Command Center")
 st.markdown("### Lead Architect: **Akansh Saxena** | B.Tech CSE Final Year")
 st.markdown("#### **J.K. Institute of Applied Physics & Technology**")
