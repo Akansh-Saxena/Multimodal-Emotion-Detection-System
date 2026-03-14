@@ -11,3 +11,5 @@ numpy<2.0.0
 plotly
 matplotlib
 requests
+libgl1
+libglib2.0-0
