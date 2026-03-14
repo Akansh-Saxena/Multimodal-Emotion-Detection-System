@@ -1,23 +1,8 @@
 import os
-import sys
-import subprocess
-
-# ==========================================
-# 0. THE "NUCLEAR" AUTO-FIX FOR libGL ERROR
-# ==========================================
-# MediaPipe secretly installs a broken OpenCV on Streamlit Cloud. 
-# This script detects the libGL error and aggressively patches it at runtime.
-try:
-    import cv2
-    cv2.VideoCapture # Test if it loaded correctly
-except (ImportError, AttributeError):
-    subprocess.check_call([sys.executable, "-m", "pip", "uninstall", "-y", "opencv-python", "opencv-contrib-python", "opencv-python-headless"])
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "opencv-python-headless==4.9.0.80"])
-    import cv2
-
 os.environ["QT_QPA_PLATFORM"] = "offscreen"
 
 import streamlit as st
+import cv2
 import numpy as np
 import plotly.graph_objects as go
 import requests
