@@ -1,0 +1,12 @@
+t=2026-03-01T18:39:26+0530 lvl=info msg="no configuration paths supplied"
+t=2026-03-01T18:39:26+0530 lvl=info msg="using configuration at default config path" path=C:\\Users\\saxen\\AppData\\Local/ngrok/ngrok.yml
+t=2026-03-01T18:39:26+0530 lvl=info msg="open config file" path=C:\\Users\\saxen\\AppData\\Local\\ngrok\\ngrok.yml err=nil
+t=2026-03-01T18:39:26+0530 lvl=info msg="FIPS 140 mode" enabled=false
+t=2026-03-01T18:39:26+0530 lvl=info msg="starting web service" obj=web addr=127.0.0.1:4040 allow_hosts=[]
+t=2026-03-01T18:39:27+0530 lvl=eror msg="failed to reconnect session" obj=tunnels.session err="authentication failed: The authtoken you specified does not look like a proper ngrok authtoken.\nYour authtoken: cr_3ADUpOZhseUtSKK0EyokG3kql44\nInstructions to install your authtoken are on your ngrok dashboard:\nhttps://dashboard.ngrok.com/get-started/your-authtoken\r\n\r\nERR_NGROK_105\r\n"
+t=2026-03-01T18:39:27+0530 lvl=eror msg="session closing" obj=tunnels.session err="authentication failed: The authtoken you specified does not look like a proper ngrok authtoken.\nYour authtoken: cr_3ADUpOZhseUtSKK0EyokG3kql44\nInstructions to install your authtoken are on your ngrok dashboard:\nhttps://dashboard.ngrok.com/get-started/your-authtoken\r\n\r\nERR_NGROK_105\r\n"
+t=2026-03-01T18:39:27+0530 lvl=info msg="received stop request" obj=app stopReq="{err:{Remote:true Inner:{Inner:0xc000382560}} restart:false}"
+t=2026-03-01T18:39:27+0530 lvl=eror msg="terminating with error" obj=app err="authentication failed: The authtoken you specified does not look like a proper ngrok authtoken.\nYour authtoken: cr_3ADUpOZhseUtSKK0EyokG3kql44\nInstructions to install your authtoken are on your ngrok dashboard:\nhttps://dashboard.ngrok.com/get-started/your-authtoken\r\n\r\nERR_NGROK_105\r\n"
+t=2026-03-01T18:39:27+0530 lvl=crit msg="command failed" err="authentication failed: The authtoken you specified does not look like a proper ngrok authtoken.\nYour authtoken: cr_3ADUpOZhseUtSKK0EyokG3kql44\nInstructions to install your authtoken are on your ngrok dashboard:\nhttps://dashboard.ngrok.com/get-started/your-authtoken\r\n\r\nERR_NGROK_105\r\n"
+t=2026-03-01T18:39:27+0530 lvl=info msg="no more state changes" obj=tunnels.session
+t=2026-03-01T18:39:27+0530 lvl=warn msg="failed to check for update" obj=updater err="Post \"https://update.ngrok-agent.com/check\": context canceled"
