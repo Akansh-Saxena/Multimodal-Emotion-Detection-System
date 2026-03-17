@@ -1,3 +1,5 @@
+--extra-index-url https://download.pytorch.org/whl/cpu
+
 streamlit>=1.30.0
 streamlit-webrtc>=0.47.0
 opencv-python-headless>=4.8.0
@@ -12,8 +14,5 @@ python-multipart>=0.0.6
 slowapi>=0.1.9
 soundfile>=0.12.1
 matplotlib
-
-# PyTorch CPU-specific installation
---find-links https://download.pytorch.org/whl/cpu
-torch==2.1.0+cpu
-torchaudio==2.1.0+cpu
+torch==2.1.0
+torchaudio==2.1.0
