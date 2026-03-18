@@ -1,9 +1,10 @@
+--extra-index-url https://download.pytorch.org/whl/cpu
 streamlit
 streamlit-webrtc
-opencv-python-headless
-mediapipe
 transformers
 torch
 plotly
 numpy<2.0.0
 librosa
+mediapipe
+opencv-python-headless
