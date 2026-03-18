@@ -1,0 +1,33 @@
+﻿pick ae5a6fd # Initial commit for production deployment
+s a139c6e # Fix libgl1 dependency for Debian 11+ on Render
+s 36ea027 # Integrated fully trained PyTorch models and GPU pipeline into API
+s a130a46 # Fix ModuleNotFoundError by setting PYTHONPATH to src directory for Docker
+s d77b95d # Fix Ngrok Browser Warning bypass for API requests
+s 5e3e26b # Fix Passlib bcrypt loop-hole by migrating to native pbkdf2_sha256 algorithm
+s dc06a5c # Fix CORS policy blocking ngrok custom header
+s ac9886f # Switch API connection from Ngrok to Production Render deployment
+s 7d6f8b2 # Configure Vercel for static frontend only and point to Hugging Face API
+s 1cb94aa # Fix Vercel routing to serve public directory
+s 2bdde2f # Attempt #3: Use native outputDirectory configuration for Vercel
+s a7bf6fa # Move index.html strictly to root
+s d9e195b # Force Vercel static build for index.html only
+s d3883a1 # Isolate frontend to bypass Vercel Python builder
+s f8618b4 # Add CORS middleware for frontend communication
+s 572a33e # Remove large files from repo
+s 4529949 # update api and frontend URLs
+s 109eeb4 # Fix syntax errors and remove JWT from frontend
+s 845cfa6 # Apply frontend fixes to all public directories
+s be58cf6 # Update requirements.txt
+s 43e2045 # Update requirements.txt
+s e954c63 # Update requirements.txt
+s 21eee63 # Create streamlit_app.py
+s 60f8cda # Update streamlit_app.py
+s fd3341d # Update streamlit_app.py
+s 9679512 # Fix NameError in streamlit_app.py and integrate Antigravity Engine Hub UI changes
+s 40a3171 # Fix SyntaxError by resolving git conflict markers in streamlit_app.py
+s 46993ee # Update streamlit_app.py
+s 3884fab # Update streamlit_app.py
+s f627313 # Update requirements.txt
+s b6005f9 # Merge remote UI updates and fix backend connection URL
+pick 02170f2 # second prototype
+pick 86ef22a # feat: final architecture integration and multimodal deployment
