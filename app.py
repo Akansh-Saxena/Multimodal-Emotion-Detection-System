@@ -1,9 +1,10 @@
 import streamlit as st
 import plotly.graph_objects as go
-from transformers import pipeline
 import streamlit.components.v1 as components
-import numpy as np
-import time
+import requests
+import google.generativeai as genai
+from hume import HumeBatchClient
+from hume.models.config import LanguageConfig
 
 # ==========================================
 # 1. CORE SYSTEM CONFIGURATION
@@ -18,21 +19,18 @@ st.markdown("""
     .wait-box { background: #121212; padding: 30px; border-radius: 15px; text-align: center; border: 1px solid #00f2ff; box-shadow: 0px 0px 15px rgba(0, 242, 255, 0.2); }
     .stTabs [data-baseweb="tab-list"] { gap: 10px; }
     .stTabs [data-baseweb="tab"] { background-color: #1e1e1e; border-radius: 5px 5px 0 0; padding: 10px 20px; color: white; }
+    .metric-card { background: rgba(0, 242, 255, 0.05); border: 1px solid #00f2ff; padding: 10px; border-radius: 10px; text-align: center; }
 </style>
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 2. CACHED INTELLIGENCE CORE
+# 2. API INITIALIZATION
 # ==========================================
-@st.cache_resource(show_spinner="Initializing 8-Head Attention Core...")
-def load_sota_models():
-    # Using Hartmann's DistilRoBERTa - lightweight enough for Render Free Tier (512MB RAM)
-    return pipeline("text-classification", model="j-hartmann/emotion-english-distilroberta-base", top_k=None)
-
 try:
-    engine = load_sota_models()
+    genai.configure(api_key=st.secrets["GOOGLE"]["API_KEY"])
+    hume_client = HumeBatchClient(st.secrets["HUME_AI"]["API_KEY"])
 except Exception as e:
-    st.error(f"Engine Boot Failure: {e}")
+    st.warning("API Keys missing or invalid. Please check your secrets.")
 
 # Persistence Layer
 if 'current_emotion' not in st.session_state:
@@ -67,14 +65,28 @@ with col_input:
             st.toast("Visual Frame Buffered", icon="📷")
             
     with tab_audio:
-        st.info("🌐 Multi-Language Support Activated (Hindi/English)")
+        st.info("🌐 Multi-Language Support Activated (Hume AI Prosody)")
         audio_feed = st.audio_input("Initialize Microphone")
         
     with tab_geo:
-        st.markdown("**Real-Time GPS Telemetry**")
+        st.markdown("**Real-Time GPS & Weather Telemetry**")
+        city = st.text_input("Environmental Node:", value="Bareilly")
+        
+        # Weather Integration
+        w_key = st.secrets["OPENWEATHER"]["API_KEY"]
+        weather_url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={w_key}&units=metric"
+        try:
+            w_res = requests.get(weather_url).json()
+            if "main" in w_res:
+                c1, c2 = st.columns(2)
+                c1.markdown(f"<div class='metric-card'>🌡️ Temp<br><b>{w_res['main']['temp']}°C</b></div>", unsafe_allow_html=True)
+                c2.markdown(f"<div class='metric-card'>💧 Humid<br><b>{w_res['main']['humidity']}%</b></div>", unsafe_allow_html=True)
+        except:
+            st.error("Weather Node Offline")
+
         components.html(
             """
-            <div id="location" style="color: #00f2ff; font-family: monospace; font-size: 14px; padding: 12px; border: 1px solid #00f2ff; border-radius: 5px; background: #000;">
+            <div id="location" style="color: #00f2ff; font-family: monospace; font-size: 14px; padding: 12px; border: 1px solid #00f2ff; border-radius: 5px; background: #000; margin-top: 10px;">
                 🛰️ Acquiring Satellite Lock...
             </div>
             <script>
@@ -92,26 +104,34 @@ with col_input:
     st.write("📡 **Modality Reliability Weighting**")
     v_gate = st.slider("Visual Weight", 0.0, 1.0, 0.9)
     a_gate = st.slider("Acoustic Weight", 0.0, 1.0, 0.8)
+    s_gate = st.slider("Semantic Weight", 0.0, 1.0, 0.75)
     
     if st.button("EXECUTE NEURO-SYMBOLIC FUSION", use_container_width=True, type="primary"):
-        if query or webcam_image or audio_feed:
-            with st.spinner("Synchronizing Multimodal Matrices..."):
-                # 1. Text Analysis
-                if query:
-                    results = engine(query)[0]
-                else:
-                    # Fallback if only visual/audio is used
-                    results = [{'label': 'neutral', 'score': 1.0}]
-                
-                # 2. Late Fusion Logic Simulation
-                # In your final demo, you'd multiply text_score * visual_weight
-                top = max(results, key=lambda x: x['score'])
-                
-                st.session_state.current_emotion = top['label'].upper()
-                st.session_state.chart_data = results
-                st.balloons()
+        if query:
+            with st.spinner("Synchronizing Multimodal Matrices via Gemini Pro..."):
+                try:
+                    # 1. Semantic Analysis via Gemini
+                    model = genai.GenerativeModel('gemini-pro')
+                    prompt = f"Analyze the emotion of this text: '{query}'. Return only the dominant emotion in one word."
+                    response = model.generate_content(prompt)
+                    detected = response.text.strip().upper()
+
+                    # 2. Simulate Fusion Weighting
+                    st.session_state.current_emotion = detected
+                    
+                    # 3. Dummy data for radar (Hume Integration would populate this)
+                    st.session_state.chart_data = [
+                        {'label': 'Joy', 'score': 0.8 if 'JOY' in detected else 0.2},
+                        {'label': 'Sadness', 'score': 0.7 if 'SAD' in detected else 0.1},
+                        {'label': 'Anger', 'score': 0.6 if 'ANGER' in detected else 0.1},
+                        {'label': 'Surprise', 'score': 0.5 if 'SURPRISE' in detected else 0.3},
+                        {'label': 'Neutral', 'score': 0.4}
+                    ]
+                    st.balloons()
+                except Exception as e:
+                    st.error(f"Fusion Error: {e}")
         else:
-            st.warning("No sensory data detected in buffers.")
+            st.warning("Please provide Semantic input (Transcript) for Neural Overlay.")
 
 with col_viz:
     st.subheader("🌐 Cognitive Telemetry")
@@ -124,7 +144,7 @@ with col_viz:
     """, unsafe_allow_html=True)
     
     if st.session_state.chart_data:
-        labels = [r['label'].capitalize() for r in st.session_state.chart_data]
+        labels = [r['label'] for r in st.session_state.chart_data]
         scores = [r['score'] * 100 for r in st.session_state.chart_data]
         
         fig = go.Figure(data=go.Scatterpolar(
@@ -138,4 +158,4 @@ with col_viz:
         st.plotly_chart(fig, use_container_width=True)
 
 st.divider()
-st.caption("NeuroSense V1.2 | Lead Developer: Akansh Saxena")
+st.caption("NeuroSense V2.0 | Integrated Multimodal Engine | Lead Architect: Akansh Saxena")
