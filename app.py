@@ -5,7 +5,6 @@ import requests
 import google.generativeai as genai
 
 # --- ROBUST HUME IMPORT WRAPPER ---
-# This fixes the "cannot import name HumeBatchClient" error
 hume_available = False
 try:
     from hume import HumeBatchClient
@@ -15,18 +14,14 @@ except ImportError:
         from hume.admin import HumeBatchClient
         hume_available = True
     except ImportError:
-        try:
-            from hume.legacy import HumeBatchClient
-            hume_available = True
-        except ImportError:
-            st.sidebar.warning("⚠️ Hume SDK structure mismatch. Batch features may be limited.")
+        st.sidebar.warning("⚠️ Hume SDK Structure mismatch. Batch mode disabled.")
 
 # ==========================================
 # 1. CORE SYSTEM CONFIGURATION
 # ==========================================
 st.set_page_config(page_title="NeuroSense | Command Center", layout="wide", page_icon="🧠")
 
-# Cyberpunk Styling
+# Cyberpunk UI Styling
 st.markdown("""
 <style>
     .header { background: linear-gradient(90deg, #0f2027, #203a43, #2c5364); padding: 25px; border-radius: 15px; color: white; margin-bottom: 25px; border: 1px solid #00f2ff; }
@@ -40,7 +35,7 @@ st.markdown("""
 # 2. API INITIALIZATION
 # ==========================================
 try:
-    # Initialize Google Gemini
+    # Initialize Google Gemini 1.5
     genai.configure(api_key=st.secrets["GOOGLE"]["API_KEY"])
     
     # Initialize Hume if available
@@ -53,7 +48,7 @@ except Exception as e:
     status_indicator = "🔴 CONFIGURATION ERROR"
     st.sidebar.error(f"Setup Error: {e}")
 
-# Persistence Layer
+# Session State Persistence
 if 'current_emotion' not in st.session_state:
     st.session_state.current_emotion = "IDLE"
 if 'chart_data' not in st.session_state:
@@ -65,7 +60,8 @@ if 'chart_data' not in st.session_state:
 st.sidebar.title("📡 System Pulse")
 st.sidebar.write(f"**Status:** {status_indicator}")
 st.sidebar.divider()
-st.sidebar.write(f"**Architect:** Akansh Saxena")
+st.sidebar.write("**Architect:** Akansh Saxena")
+st.sidebar.write("⚡ Engine: Gemini 1.5 Flash")
 
 st.markdown(f"""
 <div class='header'>
@@ -81,15 +77,15 @@ with col_input:
     st.subheader("⚙️ Sensory Ingestion Array")
     t1, t2, t3, t4 = st.tabs(["📝 Semantic", "📷 Visual", "🎙️ Acoustic", "📍 Location"])
     
-    with t1: # SEMANTIC
+    with t1: # SEMANTIC (TEXT)
         query = st.text_area("Transcript Input:", placeholder="Enter text to analyze...", height=100)
         
-    with t2: # VISUAL
-        webcam = st.camera_input("Engage Optical Sensor", label_visibility="collapsed")
+    with t2: # VISUAL (CAMERA)
+        st.camera_input("Engage Optical Sensor", label_visibility="collapsed")
             
-    with t3: # ACOUSTIC
+    with t3: # ACOUSTIC (AUDIO)
         st.info("🌐 Hume AI Prosody Analysis Active")
-        audio = st.audio_input("Initialize Microphone")
+        st.audio_input("Initialize Microphone")
         
     with t4: # LOCATION & WEATHER
         city = st.text_input("Environmental Node City:", value="Bareilly")
@@ -103,18 +99,31 @@ with col_input:
         except:
             st.caption("Weather API Unavailable")
 
+        components.html("""
+            <div id="location" style="color: #00f2ff; font-family: monospace; font-size: 14px; padding: 12px; border: 1px solid #00f2ff; border-radius: 5px; background: #000; margin-top: 10px;">
+                🛰️ Acquiring Satellite Lock...
+            </div>
+            <script>
+                navigator.geolocation.getCurrentPosition(function(p) {
+                    document.getElementById("location").innerHTML = 
+                        "✅ <b>TARGET LOCKED</b><br>LAT: " + p.coords.latitude.toFixed(6) + "<br>LON: " + p.coords.longitude.toFixed(6);
+                }, function(e) { document.getElementById("location").innerHTML = "❌ GPS Access Denied"; });
+            </script>
+            """, height=100)
+    
     st.write("---")
     st.write("📡 **Modality Reliability Weighting**")
     v_gate = st.slider("Visual Weight", 0.0, 1.0, 0.9)
     s_gate = st.slider("Semantic Weight", 0.0, 1.0, 0.75)
     
+    # --- FUSION EXECUTION ---
     if st.button("EXECUTE NEURO-SYMBOLIC FUSION", use_container_width=True, type="primary"):
         if query:
-            with st.spinner("Processing Multimodal Matrices..."):
+            with st.spinner("Synchronizing Multimodal Matrices via Gemini 1.5 Flash..."):
                 try:
-                    # Semantic Analysis via Gemini Pro
-                    model = genai.GenerativeModel('gemini-pro')
-                    response = model.generate_content(f"Analyze the emotion of: '{query}'. Return one word only.")
+                    # FIX: Updated model string to solve 404 error
+                    model = genai.GenerativeModel('gemini-1.5-flash')
+                    response = model.generate_content(f"Analyze emotion of: '{query}'. Return one word only.")
                     detected = response.text.strip().upper()
 
                     st.session_state.current_emotion = detected
@@ -126,6 +135,7 @@ with col_input:
                         {'label': 'Neutral', 'score': 0.45}
                     ]
                     st.balloons()
+                    st.toast(f"Fusion Complete: {detected}", icon="🧠")
                 except Exception as e:
                     st.error(f"Fusion Failed: {e}")
         else:
@@ -148,4 +158,4 @@ with col_viz:
         st.plotly_chart(fig, use_container_width=True)
 
 st.divider()
-st.caption("NeuroSense V2.3 | Lead Architect: Akansh Saxena | J.K. Institute of Applied Physics & Technology")
+st.caption("NeuroSense V2.4 | Lead Architect: Akansh Saxena | J.K. Institute of Applied Physics & Technology")
