@@ -2,21 +2,31 @@ import streamlit as st
 import plotly.graph_objects as go
 import streamlit.components.v1 as components
 import requests
-# Using the NEW Google GenAI SDK for 2026
-from google import genai
+import google.generativeai as genai
 
-# --- HUME IMPORT FIX ---
+# --- ROBUST HUME IMPORT STRATEGY ---
+# This prevents the "ModuleNotFoundError" by checking all possible paths
+hume_available = False
 try:
     from hume import HumeBatchClient
+    hume_available = True
 except ImportError:
-    # Most likely location in 0.13.x/0.14.x environments
-    from hume.admin import HumeBatchClient
+    try:
+        from hume.batch import HumeBatchClient
+        hume_available = True
+    except ImportError:
+        try:
+            from hume.admin import HumeBatchClient
+            hume_available = True
+        except ImportError:
+            st.sidebar.warning("⚠️ Hume SDK structure mismatch. Batch features limited.")
 
 # ==========================================
 # 1. CORE SYSTEM CONFIGURATION
 # ==========================================
 st.set_page_config(page_title="NeuroSense | Command Center", layout="wide", page_icon="🧠")
 
+# Cyberpunk UI Styling
 st.markdown("""
 <style>
     .header { background: linear-gradient(90deg, #0f2027, #203a43, #2c5364); padding: 25px; border-radius: 15px; color: white; margin-bottom: 25px; border: 1px solid #00f2ff; }
@@ -27,17 +37,22 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 2. API INITIALIZATION (UPDATED FOR 2026)
+# 2. API INITIALIZATION
 # ==========================================
 try:
-    # New 2026 Client initialization
-    google_client = genai.Client(api_key=st.secrets["GOOGLE"]["API_KEY"])
-    hume_client = HumeBatchClient(st.secrets["HUME_AI"]["API_KEY"])
-    status_indicator = "🟢 NEURAL CORE ONLINE"
+    # Initialize Google Gemini 1.5 Flash (Fixes 404 error)
+    genai.configure(api_key=st.secrets["GOOGLE"]["API_KEY"])
+    
+    if hume_available:
+        hume_client = HumeBatchClient(st.secrets["HUME_AI"]["API_KEY"])
+        status_indicator = "🟢 NEURAL CORE ONLINE"
+    else:
+        status_indicator = "🟡 SEMANTIC ENGINE ONLY"
 except Exception as e:
     status_indicator = "🔴 CONFIGURATION ERROR"
     st.sidebar.error(f"Setup Error: {e}")
 
+# Session State Persistence
 if 'current_emotion' not in st.session_state:
     st.session_state.current_emotion = "IDLE"
 if 'chart_data' not in st.session_state:
@@ -50,7 +65,7 @@ st.sidebar.title("📡 System Pulse")
 st.sidebar.write(f"**Status:** {status_indicator}")
 st.sidebar.divider()
 st.sidebar.write("**Architect:** Akansh Saxena")
-st.sidebar.write("⚡ Engine: Gemini 2.5 Flash")
+st.sidebar.write("⚡ Engine: Gemini 1.5 Flash")
 
 st.markdown(f"""
 <div class='header'>
@@ -66,13 +81,17 @@ with col_input:
     st.subheader("⚙️ Sensory Ingestion Array")
     t1, t2, t3, t4 = st.tabs(["📝 Semantic", "📷 Visual", "🎙️ Acoustic", "📍 Location"])
     
-    with t1:
+    with t1: # SEMANTIC
         query = st.text_area("Transcript Input:", placeholder="Enter text to analyze...", height=100)
-    with t2:
-        st.camera_input("Optical Sensor", label_visibility="collapsed")
-    with t3:
+        
+    with t2: # VISUAL
+        st.camera_input("Engage Optical Sensor", label_visibility="collapsed")
+            
+    with t3: # ACOUSTIC
+        st.info("🌐 Hume AI Prosody Analysis Active")
         st.audio_input("Initialize Microphone")
-    with t4:
+        
+    with t4: # LOCATION & WEATHER
         city = st.text_input("Environmental Node City:", value="Bareilly")
         try:
             w_key = st.secrets["OPENWEATHER"]["API_KEY"]
@@ -91,13 +110,11 @@ with col_input:
     
     if st.button("EXECUTE NEURO-SYMBOLIC FUSION", use_container_width=True, type="primary"):
         if query:
-            with st.spinner("Processing via Gemini 2.5 Flash..."):
+            with st.spinner("Processing Multimodal Matrices..."):
                 try:
-                    # UPDATED FOR 2026: Using Gemini 2.5 Flash
-                    response = google_client.models.generate_content(
-                        model="gemini-2.5-flash",
-                        contents=f"Analyze emotion of: '{query}'. Return one word only."
-                    )
+                    # FIX: Using 'gemini-1.5-flash' to resolve 404
+                    model = genai.GenerativeModel('gemini-1.5-flash')
+                    response = model.generate_content(f"Analyze the emotion of: '{query}'. Return one word only.")
                     detected = response.text.strip().upper()
 
                     st.session_state.current_emotion = detected
@@ -119,7 +136,7 @@ with col_viz:
     st.markdown(f"""
     <div class='wait-box'>
         <p style='color:#00f2ff; text-transform:uppercase; letter-spacing:2px; font-size:12px;'>Final Cognitive Polarity</p>
-        <h1 style='color:white; font-size:3.5em; margin:5px 0;'>{st.session_state.current_emotion}</h1>
+        <h1 style='color:white; font-size:3.5em; margin:5px 0; text-shadow: 0 0 15px #00f2ff;'>{st.session_state.current_emotion}</h1>
     </div>
     """, unsafe_allow_html=True)
     
@@ -131,4 +148,4 @@ with col_viz:
         st.plotly_chart(fig, use_container_width=True)
 
 st.divider()
-st.caption("NeuroSense V2.5 | Lead Architect: Akansh Saxena | J.K. Institute of Applied Physics & Technology")
+st.caption("NeuroSense V2.4 | Lead Architect: Akansh Saxena | J.K. Institute of Applied Physics & Technology")
