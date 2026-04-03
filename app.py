@@ -3,7 +3,7 @@ import plotly.graph_objects as go
 import streamlit.components.v1 as components
 import requests
 import google.generativeai as genai
-from hume import HumeBatchClient
+from hume.admin import HumeBatchClient
 
 # ==========================================
 # 1. CORE SYSTEM CONFIGURATION
