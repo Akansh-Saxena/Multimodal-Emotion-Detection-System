@@ -2,18 +2,17 @@ import streamlit as st
 import plotly.graph_objects as go
 import streamlit.components.v1 as components
 import requests
-# Using the NEW Google GenAI SDK for 2026
+# Using the modern 2026 Google GenAI SDK
 from google import genai
 
 # --- ROBUST HUME IMPORT ---
 hume_available = False
 try:
-    # Most recent 2026 SDK structure
-    from hume import HumeClient as HumeBatchClient
+    from hume import HumeBatchClient
     hume_available = True
 except ImportError:
     try:
-        from hume import HumeBatchClient
+        from hume.admin import HumeBatchClient
         hume_available = True
     except ImportError:
         st.sidebar.warning("⚠️ Hume SDK structure mismatch. Batch features limited.")
@@ -36,11 +35,11 @@ st.markdown("""
 # 2. API INITIALIZATION
 # ==========================================
 try:
-    # 2026 Google GenAI Client
+    # 2026 Client Syntax
     google_client = genai.Client(api_key=st.secrets["GOOGLE"]["API_KEY"])
     
     if hume_available:
-        hume_client = HumeBatchClient(api_key=st.secrets["HUME_AI"]["API_KEY"])
+        hume_client = HumeBatchClient(st.secrets["HUME_AI"]["API_KEY"])
         status_indicator = "🟢 NEURAL CORE ONLINE"
     else:
         status_indicator = "🟡 SEMANTIC ONLY MODE"
@@ -60,7 +59,7 @@ st.sidebar.title("📡 System Pulse")
 st.sidebar.write(f"**Status:** {status_indicator}")
 st.sidebar.divider()
 st.sidebar.write("**Architect:** Akansh Saxena")
-st.sidebar.write("⚡ Engine: Gemini 3.1 Flash")
+st.sidebar.write("⚡ Engine: Gemini 2.5 Flash")
 
 st.markdown(f"""
 <div class='header'>
@@ -77,13 +76,13 @@ with col_input:
     t1, t2, t3, t4 = st.tabs(["📝 Semantic", "📷 Visual", "🎙️ Acoustic", "📍 Location"])
     
     with t1:
-        query = st.text_area("Transcript Input:", placeholder="Enter text to analyze...", height=100)
+        query = st.text_area("Transcript Input:", placeholder="Analyze current cognitive state...", height=100)
     with t2:
         st.camera_input("Optical Sensor", label_visibility="collapsed")
     with t3:
         st.audio_input("Initialize Microphone")
     with t4:
-        city = st.text_input("Environmental Node City:", value="Bareilly")
+        city = st.text_input("Environmental Node:", value="Bareilly")
         try:
             w_key = st.secrets["OPENWEATHER"]["API_KEY"]
             w_res = requests.get(f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={w_key}&units=metric").json()
@@ -92,7 +91,7 @@ with col_input:
                 c1.markdown(f"<div class='metric-card'>🌡️ {w_res['main']['temp']}°C</div>", unsafe_allow_html=True)
                 c2.markdown(f"<div class='metric-card'>💧 {w_res['main']['humidity']}% Humid</div>", unsafe_allow_html=True)
         except:
-            st.caption("Weather API Unavailable")
+            st.caption("Weather Offline")
 
     st.write("---")
     st.write("📡 **Modality Reliability Weighting**")
@@ -101,11 +100,11 @@ with col_input:
     
     if st.button("EXECUTE NEURO-SYMBOLIC FUSION", use_container_width=True, type="primary"):
         if query:
-            with st.spinner("Processing via Gemini 3.1 Flash..."):
+            with st.spinner("Processing Multimodal Matrices..."):
                 try:
-                    # FIX: Using 'gemini-3.1-flash' to solve the 404 error
+                    # FIX: Using 'gemini-2.5-flash' which is the stable model name
                     response = google_client.models.generate_content(
-                        model="gemini-3.1-flash",
+                        model="gemini-2.5-flash",
                         contents=f"Analyze emotion of: '{query}'. Return one word only."
                     )
                     detected = response.text.strip().upper()
@@ -126,12 +125,7 @@ with col_input:
 
 with col_viz:
     st.subheader("🌐 Cognitive Telemetry")
-    st.markdown(f"""
-    <div class='wait-box'>
-        <p style='color:#00f2ff; text-transform:uppercase; letter-spacing:2px; font-size:12px;'>Final Cognitive Polarity</p>
-        <h1 style='color:white; font-size:3.5em; margin:5px 0;'>{st.session_state.current_emotion}</h1>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown(f"<div class='wait-box'><p style='color:#00f2ff; text-transform:uppercase; letter-spacing:2px; font-size:12px;'>Final Cognitive Polarity</p><h1 style='color:white; font-size:3.5em; margin:5px 0;'>{st.session_state.current_emotion}</h1></div>", unsafe_allow_html=True)
     
     if st.session_state.chart_data:
         labels = [r['label'] for r in st.session_state.chart_data]
@@ -141,4 +135,4 @@ with col_viz:
         st.plotly_chart(fig, use_container_width=True)
 
 st.divider()
-st.caption("NeuroSense V2.5 | Lead Architect: Akansh Saxena | J.K. Institute of Applied Physics & Technology")
+st.caption("NeuroSense V2.6 | Lead Architect: Akansh Saxena | J.K. Institute of Applied Physics & Technology")
