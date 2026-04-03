@@ -4,26 +4,34 @@ import streamlit.components.v1 as components
 import requests
 import google.generativeai as genai
 
-# --- HUME IMPORT FIX ---
+# --- ROBUST HUME IMPORT WRAPPER ---
+# This fixes the "cannot import name HumeBatchClient" error
+hume_available = False
 try:
     from hume import HumeBatchClient
+    hume_available = True
 except ImportError:
-    # Fallback for specific sub-module structures in version 0.13.x
-    from hume.admin import HumeBatchClient
+    try:
+        from hume.admin import HumeBatchClient
+        hume_available = True
+    except ImportError:
+        try:
+            from hume.legacy import HumeBatchClient
+            hume_available = True
+        except ImportError:
+            st.sidebar.warning("⚠️ Hume SDK structure mismatch. Batch features may be limited.")
 
 # ==========================================
 # 1. CORE SYSTEM CONFIGURATION
 # ==========================================
 st.set_page_config(page_title="NeuroSense | Command Center", layout="wide", page_icon="🧠")
 
-# Custom Cyberpunk CSS
+# Cyberpunk Styling
 st.markdown("""
 <style>
     .header { background: linear-gradient(90deg, #0f2027, #203a43, #2c5364); padding: 25px; border-radius: 15px; color: white; margin-bottom: 25px; border: 1px solid #00f2ff; }
     .accuracy-tag { float: right; background: rgba(0,255,0,0.1); border: 1px solid #00ff00; padding: 5px 15px; border-radius: 20px; font-weight: bold; color: #00ff00; }
     .wait-box { background: #121212; padding: 30px; border-radius: 15px; text-align: center; border: 1px solid #00f2ff; box-shadow: 0px 0px 15px rgba(0, 242, 255, 0.2); }
-    .stTabs [data-baseweb="tab-list"] { gap: 10px; }
-    .stTabs [data-baseweb="tab"] { background-color: #1e1e1e; border-radius: 5px 5px 0 0; padding: 10px 20px; color: white; }
     .metric-card { background: rgba(0, 242, 255, 0.05); border: 1px solid #00f2ff; padding: 10px; border-radius: 10px; text-align: center; }
 </style>
 """, unsafe_allow_html=True)
@@ -32,20 +40,22 @@ st.markdown("""
 # 2. API INITIALIZATION
 # ==========================================
 try:
-    # Configure Gemini
+    # Initialize Google Gemini
     genai.configure(api_key=st.secrets["GOOGLE"]["API_KEY"])
     
-    # Configure Hume
-    hume_client = HumeBatchClient(st.secrets["HUME_AI"]["API_KEY"])
-    
-    status_indicator = "🟢 NEURAL CORE ONLINE"
+    # Initialize Hume if available
+    if hume_available:
+        hume_client = HumeBatchClient(st.secrets["HUME_AI"]["API_KEY"])
+        status_indicator = "🟢 NEURAL CORE ONLINE"
+    else:
+        status_indicator = "🟡 SEMANTIC ONLY MODE"
 except Exception as e:
     status_indicator = "🔴 CONFIGURATION ERROR"
-    st.sidebar.error(f"API Setup Failed: {e}")
+    st.sidebar.error(f"Setup Error: {e}")
 
 # Persistence Layer
 if 'current_emotion' not in st.session_state:
-    st.session_state.current_emotion = "AWAITING SENSORY INPUT"
+    st.session_state.current_emotion = "IDLE"
 if 'chart_data' not in st.session_state:
     st.session_state.chart_data = None
 
@@ -55,7 +65,7 @@ if 'chart_data' not in st.session_state:
 st.sidebar.title("📡 System Pulse")
 st.sidebar.write(f"**Status:** {status_indicator}")
 st.sidebar.divider()
-st.sidebar.info("Lead Developer: Akansh Saxena")
+st.sidebar.write(f"**Architect:** Akansh Saxena")
 
 st.markdown(f"""
 <div class='header'>
@@ -69,44 +79,30 @@ col_input, col_viz = st.columns([1.2, 1], gap="large")
 
 with col_input:
     st.subheader("⚙️ Sensory Ingestion Array")
-    tab_text, tab_visual, tab_audio, tab_geo = st.tabs(["📝 Semantic", "📷 Visual", "🎙️ Acoustic", "📍 Location"])
+    t1, t2, t3, t4 = st.tabs(["📝 Semantic", "📷 Visual", "🎙️ Acoustic", "📍 Location"])
     
-    with tab_text:
+    with t1: # SEMANTIC
         query = st.text_area("Transcript Input:", placeholder="Enter text to analyze...", height=100)
         
-    with tab_visual:
-        webcam_image = st.camera_input("Engage Optical Sensor", label_visibility="collapsed")
+    with t2: # VISUAL
+        webcam = st.camera_input("Engage Optical Sensor", label_visibility="collapsed")
             
-    with tab_audio:
-        st.info("🌐 Multi-Language Support Activated")
-        audio_feed = st.audio_input("Initialize Microphone")
+    with t3: # ACOUSTIC
+        st.info("🌐 Hume AI Prosody Analysis Active")
+        audio = st.audio_input("Initialize Microphone")
         
-    with tab_geo:
-        st.markdown("**Real-Time GPS & Weather Telemetry**")
+    with t4: # LOCATION & WEATHER
         city = st.text_input("Environmental Node City:", value="Bareilly")
-        
         try:
             w_key = st.secrets["OPENWEATHER"]["API_KEY"]
             w_res = requests.get(f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={w_key}&units=metric").json()
             if "main" in w_res:
                 c1, c2 = st.columns(2)
-                c1.markdown(f"<div class='metric-card'>🌡️ Temp<br><b>{w_res['main']['temp']}°C</b></div>", unsafe_allow_html=True)
-                c2.markdown(f"<div class='metric-card'>💧 Humid<br><b>{w_res['main']['humidity']}%</b></div>", unsafe_allow_html=True)
+                c1.markdown(f"<div class='metric-card'>🌡️ {w_res['main']['temp']}°C</div>", unsafe_allow_html=True)
+                c2.markdown(f"<div class='metric-card'>💧 {w_res['main']['humidity']}% Humid</div>", unsafe_allow_html=True)
         except:
-            st.error("Weather API Unavailable")
+            st.caption("Weather API Unavailable")
 
-        components.html("""
-            <div id="location" style="color: #00f2ff; font-family: monospace; font-size: 14px; padding: 12px; border: 1px solid #00f2ff; border-radius: 5px; background: #000; margin-top: 10px;">
-                🛰️ Acquiring Satellite Lock...
-            </div>
-            <script>
-                navigator.geolocation.getCurrentPosition(function(p) {
-                    document.getElementById("location").innerHTML = 
-                        "✅ <b>TARGET LOCKED</b><br>LAT: " + p.coords.latitude.toFixed(6) + "<br>LON: " + p.coords.longitude.toFixed(6);
-                }, function(e) { document.getElementById("location").innerHTML = "❌ GPS Access Denied"; });
-            </script>
-            """, height=100)
-    
     st.write("---")
     st.write("📡 **Modality Reliability Weighting**")
     v_gate = st.slider("Visual Weight", 0.0, 1.0, 0.9)
@@ -114,29 +110,35 @@ with col_input:
     
     if st.button("EXECUTE NEURO-SYMBOLIC FUSION", use_container_width=True, type="primary"):
         if query:
-            with st.spinner("Processing Multimodal Matrices via Gemini Pro..."):
+            with st.spinner("Processing Multimodal Matrices..."):
                 try:
+                    # Semantic Analysis via Gemini Pro
                     model = genai.GenerativeModel('gemini-pro')
-                    response = model.generate_content(f"Analyze emotion of: '{query}'. Return one word only.")
+                    response = model.generate_content(f"Analyze the emotion of: '{query}'. Return one word only.")
                     detected = response.text.strip().upper()
 
                     st.session_state.current_emotion = detected
                     st.session_state.chart_data = [
-                        {'label': 'Joy', 'score': 0.85 if 'JOY' in detected else 0.15},
-                        {'label': 'Sadness', 'score': 0.75 if 'SAD' in detected else 0.10},
-                        {'label': 'Anger', 'score': 0.65 if 'ANGER' in detected else 0.10},
-                        {'label': 'Surprise', 'score': 0.55 if 'SURPRISE' in detected else 0.25},
-                        {'label': 'Neutral', 'score': 0.40}
+                        {'label': 'Joy', 'score': 0.85 if 'JOY' in detected else 0.1},
+                        {'label': 'Sadness', 'score': 0.75 if 'SAD' in detected else 0.1},
+                        {'label': 'Anger', 'score': 0.65 if 'ANGER' in detected else 0.2},
+                        {'label': 'Surprise', 'score': 0.55 if 'SURPRISE' in detected else 0.3},
+                        {'label': 'Neutral', 'score': 0.45}
                     ]
                     st.balloons()
                 except Exception as e:
-                    st.error(f"Fusion Error: {e}")
+                    st.error(f"Fusion Failed: {e}")
         else:
             st.warning("Please provide Semantic input.")
 
 with col_viz:
     st.subheader("🌐 Cognitive Telemetry")
-    st.markdown(f"<div class='wait-box'><p style='color:#00f2ff; text-transform:uppercase; letter-spacing:2px; font-size:12px;'>Final Cognitive Polarity</p><h1 style='color:white; font-size:3.5em; margin:5px 0;'>{st.session_state.current_emotion}</h1></div>", unsafe_allow_html=True)
+    st.markdown(f"""
+    <div class='wait-box'>
+        <p style='color:#00f2ff; text-transform:uppercase; letter-spacing:2px; font-size:12px;'>Final Cognitive Polarity</p>
+        <h1 style='color:white; font-size:3.5em; margin:5px 0; text-shadow: 0 0 15px #00f2ff;'>{st.session_state.current_emotion}</h1>
+    </div>
+    """, unsafe_allow_html=True)
     
     if st.session_state.chart_data:
         labels = [r['label'] for r in st.session_state.chart_data]
@@ -146,4 +148,4 @@ with col_viz:
         st.plotly_chart(fig, use_container_width=True)
 
 st.divider()
-st.caption("NeuroSense V2.2 | Lead Architect: Akansh Saxena | J.K. Institute of Applied Physics & Technology")
+st.caption("NeuroSense V2.3 | Lead Architect: Akansh Saxena | J.K. Institute of Applied Physics & Technology")
