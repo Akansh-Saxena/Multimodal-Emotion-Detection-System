@@ -1,10 +1,33 @@
-streamlit>=1.35.0
-streamlit-webrtc>=0.47.0
-plotly>=5.20.0
-numpy>=1.26.4,<2.0.0
-librosa>=0.11.0
-mediapipe>=0.10.33
-opencv-python-headless>=4.11.0.86
-hume>=0.13.10
-google-genai
-requests>=2.31.0
+# ============================================================
+# NeuroSense AI — Backend Dependencies
+# Author: Akansh Saxena | JKIAP&T, Allahabad University
+# ============================================================
+# Pin versions for reproducible deployments on Render.com
+# ============================================================
+
+# ── Core API Framework ───────────────────────────────────────
+fastapi==0.111.0
+uvicorn[standard]==0.30.1
+python-multipart==0.0.9         # Required for Form() + File() uploads
+
+# ── AI / ML Stack ────────────────────────────────────────────
+torch==2.3.1                    # CPU-only build — much smaller download
+transformers==4.41.2            # HuggingFace: RoBERTa + Wav2Vec2
+accelerate==0.31.0              # Required by transformers for device mapping
+sentencepiece==0.2.0            # Tokeniser dependency for some models
+
+# ── Audio Processing ─────────────────────────────────────────
+librosa==0.10.2                 # Audio loading, resampling, mel-spectrograms
+soundfile==0.12.1               # Backend decoder for librosa
+audioread==3.0.1                # Fallback audio decoder
+
+# ── HTTP & Logging ───────────────────────────────────────────
+requests==2.32.3                # Supabase REST calls + any outbound HTTP
+httpx==0.27.0                   # Async HTTP client (future use)
+
+# ── Numerical Stack ──────────────────────────────────────────
+numpy==1.26.4
+scipy==1.13.1                   # Required by librosa
+
+# ── Supabase (Optional: use raw REST instead of SDK to save RAM) ──
+# supabase==2.5.1               # Uncomment if you prefer the official client
