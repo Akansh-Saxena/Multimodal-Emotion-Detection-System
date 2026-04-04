@@ -1,17 +1,5 @@
 import streamlit as st
-<<<<<<< HEAD
-import google.generativeai as genai
-import plotly.express as px
-import pandas as pd
-from PIL import Image
-import numpy as np
-import cv2
-
-# ---------------- CONFIG ----------------
-st.set_page_config(page_title="Multimodal Emotion AI", layout="wide")
-=======
 import plotly.graph_objects as go
-import streamlit.components.v1 as components
 import requests
 
 # ==========================================
@@ -42,7 +30,7 @@ def call_backend(text: str) -> dict | None:
         st.error(f"❌ Backend error {e.response.status_code}: {e.response.text}")
     return None
 
-# --- ROBUST HUME IMPORT (kept exactly as your original) ---
+# --- ROBUST HUME IMPORT ---
 hume_available = False
 try:
     from hume import HumeBatchClient
@@ -52,55 +40,16 @@ except ImportError:
         from hume.admin import HumeBatchClient
         hume_available = True
     except ImportError:
-        st.sidebar.warning("⚠️ Hume SDK structure mismatch. Batch features limited.")
+        pass # Warning moved below page config
 
 # ==========================================
 # 1. CORE SYSTEM CONFIGURATION
 # ==========================================
 st.set_page_config(page_title="NeuroSense | Command Center", layout="wide", page_icon="🧠")
->>>>>>> b72a6ce90b4dbe3050a5e3b2e314b6e077f82ee1
 
-# ---------------- CSS (FUTURISTIC UI) ----------------
+# 🚨 FIXED CSS BLOCK: Removed the 'f' before the triple quotes to prevent SyntaxError
 st.markdown("""
 <style>
-<<<<<<< HEAD
-body {
-    background: linear-gradient(135deg, #0f172a, #020617);
-    color: white;
-}
-.stApp {
-    background: transparent;
-}
-.glass {
-    background: rgba(255,255,255,0.05);
-    backdrop-filter: blur(12px);
-    padding: 20px;
-    border-radius: 15px;
-    border: 1px solid rgba(0,255,255,0.2);
-}
-h1, h2, h3 {
-    color: #38bdf8;
-}
-</style>
-""", unsafe_allow_html=True)
-
-# ---------------- SIDEBAR ----------------
-st.sidebar.title("⚙️ Configuration")
-
-api_key = st.sidebar.text_input("Enter Gemini API Key", type="password")
-
-if api_key:
-    genai.configure(api_key=api_key)
-
-st.sidebar.markdown("---")
-st.sidebar.markdown("### 👤 Developer")
-st.sidebar.markdown("""
-**Akansh Saxena**  
-JK Institute of Applied Physics & Technology  
-Allahabad University  
-🚀 90%+ Accuracy AI System
-""")
-=======
     .header { background: linear-gradient(90deg, #0f2027, #203a43, #2c5364); padding: 25px; border-radius: 15px; color: white; margin-bottom: 25px; border: 1px solid #00f2ff; }
     .accuracy-tag { float: right; background: rgba(0,255,0,0.1); border: 1px solid #00ff00; padding: 5px 15px; border-radius: 20px; font-weight: bold; color: #00ff00; }
     .wait-box { background: #121212; padding: 30px; border-radius: 15px; text-align: center; border: 1px solid #00f2ff; box-shadow: 0px 0px 15px rgba(0, 242, 255, 0.2); }
@@ -109,6 +58,9 @@ Allahabad University
     .conf-bar { height: 10px; border-radius: 8px; background: linear-gradient(90deg, #00f2ff, #0080ff); }
 </style>
 """, unsafe_allow_html=True)
+
+if not hume_available:
+    st.sidebar.warning("⚠️ Hume SDK structure mismatch. Batch features limited.")
 
 # ==========================================
 # 2. STATUS INITIALIZATION
@@ -155,80 +107,9 @@ st.markdown(f"""
     <p>Lead Architect: <b>Akansh Saxena</b> | J.K. Institute of Applied Physics & Technology</p>
 </div>
 """, unsafe_allow_html=True)
->>>>>>> b72a6ce90b4dbe3050a5e3b2e314b6e077f82ee1
 
-# ---------------- HEADER ----------------
-st.title("🧠 Multimodal Emotion Detection AI")
-st.markdown("### 🚀 Futuristic Emotion Intelligence System")
+col_input, col_viz = st.columns([1.2, 1], gap="large")
 
-<<<<<<< HEAD
-# ---------------- TABS ----------------
-tab1, tab2, tab3 = st.tabs(["🖼 Image", "📝 Text", "📷 Camera"])
-
-# ---------------- FUNCTION ----------------
-def analyze_text(text):
-    model = genai.GenerativeModel("gemini-pro")
-    response = model.generate_content(f"Detect emotion and give % for each: {text}")
-    return response.text
-
-def show_chart():
-    emotions = ["Happy", "Sad", "Angry", "Surprised"]
-    values = np.random.randint(10, 100, size=4)
-    df = pd.DataFrame({"Emotion": emotions, "Confidence": values})
-    fig = px.bar(df, x="Emotion", y="Confidence", title="Emotion Analysis")
-    st.plotly_chart(fig, use_container_width=True)
-
-# ---------------- IMAGE TAB ----------------
-with tab1:
-    st.markdown("### Upload Image")
-    file = st.file_uploader("Upload an image", type=["jpg","png"])
-
-    if file:
-        image = Image.open(file)
-        st.image(image, caption="Uploaded Image")
-
-        if st.button("Analyze Image"):
-            with st.spinner("Analyzing emotions..."):
-                try:
-                    result = "😊 Happy (78%)"
-                    st.success(result)
-                    show_chart()
-                except:
-                    st.error("Error processing image")
-
-# ---------------- TEXT TAB ----------------
-with tab2:
-    text = st.text_area("Enter text")
-
-    if st.button("Analyze Text"):
-        with st.spinner("Analyzing emotions..."):
-            try:
-                result = analyze_text(text)
-                st.success(result)
-                show_chart()
-            except:
-                st.error("API Error")
-
-# ---------------- CAMERA TAB ----------------
-with tab3:
-    st.markdown("### Live Camera")
-
-    run = st.checkbox("Start Camera")
-    FRAME_WINDOW = st.image([])
-
-    camera = cv2.VideoCapture(0)
-
-    while run:
-        ret, frame = camera.read()
-        if not ret:
-            st.error("Camera not working")
-            break
-        FRAME_WINDOW.image(frame, channels="BGR")
-
-# ---------------- FOOTER ----------------
-st.markdown("---")
-st.markdown("© 2026 Akansh Saxena | AI Emotion System")
-=======
 # ==========================================
 # 4. LEFT COLUMN — INPUT
 # ==========================================
@@ -252,16 +133,20 @@ with col_input:
     with t4:
         city = st.text_input("Environmental Node:", value="Bareilly")
         try:
-            w_key = st.secrets["OPENWEATHER"]["API_KEY"]
-            w_res = requests.get(
-                f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={w_key}&units=metric"
-            ).json()
-            if "main" in w_res:
-                c1, c2 = st.columns(2)
-                c1.markdown(f"<div class='metric-card'>🌡️ {w_res['main']['temp']}°C</div>", unsafe_allow_html=True)
-                c2.markdown(f"<div class='metric-card'>💧 {w_res['main']['humidity']}% Humid</div>", unsafe_allow_html=True)
-        except:
-            st.caption("Weather Offline")
+            # Added safe check to prevent crashing if Weather key is missing
+            if "OPENWEATHER" in st.secrets and "API_KEY" in st.secrets["OPENWEATHER"]:
+                w_key = st.secrets["OPENWEATHER"]["API_KEY"]
+                w_res = requests.get(
+                    f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={w_key}&units=metric"
+                ).json()
+                if "main" in w_res:
+                    c1, c2 = st.columns(2)
+                    c1.markdown(f"<div class='metric-card'>🌡️ {w_res['main']['temp']}°C</div>", unsafe_allow_html=True)
+                    c2.markdown(f"<div class='metric-card'>💧 {w_res['main']['humidity']}% Humid</div>", unsafe_allow_html=True)
+            else:
+                st.caption("Weather Offline: API Key not found in Streamlit Secrets.")
+        except Exception as e:
+            st.caption(f"Weather Offline: {e}")
 
     st.write("---")
     st.write("📡 **Modality Reliability Weighting**")
@@ -368,4 +253,3 @@ st.caption(
     "NeuroSense V2.6 | Lead Architect: Akansh Saxena "
     "| J.K. Institute of Applied Physics & Technology"
 )
->>>>>>> b72a6ce90b4dbe3050a5e3b2e314b6e077f82ee1
