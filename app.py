@@ -44,7 +44,7 @@ def analyze_text(text: str) -> dict:
 # ==========================================
 st.set_page_config(page_title="NeuroSense | Command Center", layout="wide", page_icon="🧠")
 
-# Robust Secrets Handling - Guaranteed to show your name
+# Robust Secrets Handling - Guaranteed to show your name and accuracy
 try:
     architect_name = st.secrets["SYSTEM_PRESETS"]["ARCHITECT"]
 except Exception:
@@ -137,7 +137,7 @@ with col_input:
                     st.caption("Could not fetch weather for this location.")
             else:
                 st.caption("Weather Offline: API Key missing from Streamlit Secrets.")
-        except Exception as e:
+        except Exception:
             st.caption("Weather Offline: API Connection Failed.")
 
     st.write("---")
@@ -190,8 +190,7 @@ with col_viz:
         unsafe_allow_html=True,
     )
 
-    # 🚨 FIXED PLOTLY SYNTAX 🚨
-    # Safely separated the data structure to prevent the missing parenthesis error
+    # 🚨 BULLETPROOF PLOTLY SYNTAX 🚨
     if st.session_state.chart_data:
         labels = [r["label"] for r in st.session_state.chart_data]
         scores = [r["score"] * 100 for r in st.session_state.chart_data]
@@ -239,7 +238,4 @@ with col_viz:
             )
 
 st.divider()
-st.caption(
-    f"NeuroSense V2.6 | Lead Architect: {AKANSH SAXENA} "
-    "| J.K. Institute of Applied Physics & Technology"
-)
+st.caption(f"NeuroSense V2.6 | Lead Architect: {architect_name} (Akansh Saxena) | J.K. Institute of Applied Physics & Technology")
