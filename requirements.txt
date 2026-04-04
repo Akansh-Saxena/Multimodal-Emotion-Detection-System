@@ -1,45 +1,36 @@
-<<<<<<< HEAD
+# ============================================================
+# NeuroSense AI — Full Stack Dependencies
+# Author: Akansh Saxena | JKIAP&T, Allahabad University
+# ============================================================
+
+# ── Frontend (Streamlit) ────────────────────────────────────
 streamlit
 google-generativeai
 pandas
-numpy
 Pillow
 opencv-python
 plotly
 altair
 python-dotenv
-=======
-# ============================================================
-# NeuroSense AI — Backend Dependencies
-# Author: Akansh Saxena | JKIAP&T, Allahabad University
-# ============================================================
-# Pin versions for reproducible deployments on Render.com
-# ============================================================
 
-# ── Core API Framework ───────────────────────────────────────
+# ── Backend API Framework ───────────────────────────────────
 fastapi==0.111.0
 uvicorn[standard]==0.30.1
-python-multipart==0.0.9         # Required for Form() + File() uploads
+python-multipart==0.0.9
 
-# ── AI / ML Stack ────────────────────────────────────────────
-torch==2.3.1                    # CPU-only build — much smaller download
-transformers==4.41.2            # HuggingFace: RoBERTa + Wav2Vec2
-accelerate==0.31.0              # Required by transformers for device mapping
-sentencepiece==0.2.0            # Tokeniser dependency for some models
+# ── AI / ML Stack ───────────────────────────────────────────
+torch==2.3.1
+transformers==4.41.2
+accelerate==0.31.0
+sentencepiece==0.2.0
 
-# ── Audio Processing ─────────────────────────────────────────
-librosa==0.10.2                 # Audio loading, resampling, mel-spectrograms
-soundfile==0.12.1               # Backend decoder for librosa
-audioread==3.0.1                # Fallback audio decoder
+# ── Audio Processing ────────────────────────────────────────
+librosa==0.10.2
+soundfile==0.12.1
+audioread==3.0.1
 
-# ── HTTP & Logging ───────────────────────────────────────────
-requests==2.32.3                # Supabase REST calls + any outbound HTTP
-httpx==0.27.0                   # Async HTTP client (future use)
-
-# ── Numerical Stack ──────────────────────────────────────────
+# ── HTTP, Logging & Numerical ───────────────────────────────
+requests==2.32.3
+httpx==0.27.0
 numpy==1.26.4
-scipy==1.13.1                   # Required by librosa
-
-# ── Supabase (Optional: use raw REST instead of SDK to save RAM) ──
-# supabase==2.5.1               # Uncomment if you prefer the official client
->>>>>>> b72a6ce90b4dbe3050a5e3b2e314b6e077f82ee1
+scipy==1.13.1
