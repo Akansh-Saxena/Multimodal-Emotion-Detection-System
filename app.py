@@ -1,6 +1,7 @@
 import streamlit as st
 import plotly.graph_objects as go
 import time
+import requests
 
 # ==========================================
 # 1. EMBEDDED NEURAL ENGINE (BACKEND INTEGRATION)
@@ -40,9 +41,14 @@ def analyze_text(text: str) -> dict:
         return None
 
 # ==========================================
-# 2. CORE SYSTEM CONFIGURATION
+# 2. CORE SYSTEM CONFIGURATION & SECRETS
 # ==========================================
 st.set_page_config(page_title="NeuroSense | Command Center", layout="wide", page_icon="🧠")
+
+# Safely load data from Streamlit Secrets
+architect_name = st.secrets.get("SYSTEM_PRESETS", {}).get("ARCHITECT", "Akansh Saxena")
+accuracy_raw = st.secrets.get("SYSTEM_PRESETS", {}).get("MELD_ACCURACY", 0.92)
+accuracy_str = f"{accuracy_raw * 100:.1f}%"
 
 st.markdown("""
 <style>
@@ -73,15 +79,16 @@ if 'all_scores' not in st.session_state:
 st.sidebar.title("📡 System Pulse")
 st.sidebar.write("**Status:** 🟢 NEURAL CORE ONLINE")
 st.sidebar.divider()
-st.sidebar.write("**Architect:** Akansh Saxena")
+# Dynamically injecting your name from Secrets!
+st.sidebar.write(f"**Architect:** {architect_name}")
 st.sidebar.write("⚡ Engine: Embedded DistilRoBERTa")
 st.sidebar.write("🔗 Architecture: Unified Monolith")
 
 st.markdown(f"""
 <div class='header'>
-    <span class='accuracy-tag'>🎯 MELD Accuracy: ~92.0%</span>
+    <span class='accuracy-tag'>🎯 MELD Accuracy: {accuracy_str}</span>
     <h2>🧠 NeuroSense | Multimodal Command Center</h2>
-    <p>Lead Architect: <b>Akansh Saxena</b> | J.K. Institute of Applied Physics & Technology</p>
+    <p>Lead Architect: <b>{architect_name}</b> | J.K. Institute of Applied Physics & Technology</p>
 </div>
 """, unsafe_allow_html=True)
 
@@ -92,12 +99,13 @@ col_input, col_viz = st.columns([1.2, 1], gap="large")
 # ==========================================
 with col_input:
     st.subheader("⚙️ Sensory Ingestion Array")
-    t1, t2, t3 = st.tabs(["📝 Semantic", "📷 Visual", "🎙️ Acoustic"])
+    # Restored the Location Tab
+    t1, t2, t3, t4 = st.tabs(["📝 Semantic", "📷 Visual", "🎙️ Acoustic", "📍 Location"])
 
     with t1:
         query = st.text_area(
             "Transcript Input:",
-            placeholder="Type a sentence to analyze cognitive state (e.g., 'I am so thrilled to finally launch this project!')...",
+            placeholder="Type a sentence to analyze cognitive state...",
             height=100
         )
 
@@ -106,6 +114,24 @@ with col_input:
 
     with t3:
         st.audio_input("Microphone (UI Preview)")
+
+    with t4:
+        city = st.text_input("Environmental Node:", value="Bareilly")
+        try:
+            # Safely check for OpenWeather API key
+            if "OPENWEATHER" in st.secrets and "API_KEY" in st.secrets["OPENWEATHER"]:
+                w_key = st.secrets["OPENWEATHER"]["API_KEY"]
+                w_res = requests.get(
+                    f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={w_key}&units=metric"
+                ).json()
+                if "main" in w_res:
+                    c1, c2 = st.columns(2)
+                    c1.markdown(f"<div class='metric-card'>🌡️ {w_res['main']['temp']}°C</div>", unsafe_allow_html=True)
+                    c2.markdown(f"<div class='metric-card'>💧 {w_res['main']['humidity']}% Humid</div>", unsafe_allow_html=True)
+            else:
+                st.caption("Weather Offline: API Key not found in Streamlit Secrets.")
+        except Exception as e:
+            st.caption(f"Weather Offline: {e}")
 
     st.write("---")
     st.write("📡 **Modality Reliability Weighting**")
@@ -170,34 +196,4 @@ with col_viz:
         ))
         fig.update_layout(
             polar=dict(
-                bgcolor="rgba(0,0,0,0)",
-                radialaxis=dict(visible=True, range=[0, 100], color="#fff"),
-            ),
-            showlegend=False,
-            height=400,
-            paper_bgcolor="rgba(0,0,0,0)",
-            plot_bgcolor="rgba(0,0,0,0)",
-        )
-        st.plotly_chart(fig, use_container_width=True)
-
-    if st.session_state.all_scores:
-        st.markdown("**📊 Emotion Distribution**")
-        for emotion, score in sorted(st.session_state.all_scores.items(), key=lambda item: item[1], reverse=True):
-            pct = int(score * 100)
-            st.markdown(
-                f"""
-                <div style='display:flex; justify-content:space-between; font-size:13px; color:#aaa;'>
-                    <span>{emotion.capitalize()}</span><span>{pct}%</span>
-                </div>
-                <div class='conf-bar-wrap'>
-                    <div class='conf-bar' style='width:{pct}%;'></div>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
-
-st.divider()
-st.caption(
-    "NeuroSense V2.6 | Lead Architect: Akansh Saxena "
-    "| J.K. Institute of Applied Physics & Technology"
-)
+                bgcolor
